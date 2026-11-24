@@ -458,6 +458,35 @@ class BookView {
         }
         return str || 'I';
     }
+
+    /**
+     * Tự động cuộn đến và làm nổi bật trang thành viên trong Sách Gia Phả
+     */
+    focusMember(memberId) {
+        if (!this.container || !window.familyDataManager) return;
+        const dm = window.familyDataManager;
+        const member = dm.getMemberById(memberId);
+        if (!member) return;
+
+        // Nếu đang lọc nhánh mà thành viên không thuộc nhánh đó, chuyển sang Tất cả
+        if (this.selectedBranch !== "Tất cả" && !dm.isMemberInBranch(member, this.selectedBranch)) {
+            this.selectedBranch = "Tất cả";
+            const branchSelect = document.getElementById("global-branch-select");
+            if (branchSelect) branchSelect.value = "Tất cả";
+            this.render();
+        }
+
+        setTimeout(() => {
+            const el = document.getElementById(`member-entry-${memberId}`);
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                el.classList.add("entry-highlight-pulse");
+                setTimeout(() => {
+                    el.classList.remove("entry-highlight-pulse");
+                }, 4000);
+            }
+        }, 180);
+    }
 }
 
 window.BookView = BookView;

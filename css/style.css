@@ -1672,3 +1672,207 @@ body.dark-candle-theme .kinship-label {
     box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
     transform: translateY(-1px);
 }
+
+/* ==========================================================================
+   TÍNH NĂNG: THANH TÌM KIẾM NHANH THÀNH VIÊN TRỰC QUAN (HEADER QUICK SEARCH)
+   ========================================================================== */
+.quick-search-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.quick-search-box {
+    display: flex;
+    align-items: center;
+    background: rgba(30, 3, 3, 0.75);
+    border: 1.5px solid var(--gold);
+    border-radius: 20px;
+    padding: 2px 4px 2px 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 0 6px rgba(0, 0, 0, 0.5);
+}
+
+.quick-search-box:focus-within {
+    border-color: #ffea00;
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.4), inset 0 0 8px rgba(212, 175, 55, 0.2);
+    background: rgba(45, 5, 5, 0.9);
+}
+
+.quick-search-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-size: 13.5px;
+    width: 290px;
+    padding: 5px 8px 5px 0;
+    font-family: inherit;
+}
+
+.quick-search-input::placeholder {
+    color: #c9b085;
+    font-style: italic;
+    font-size: 12.5px;
+}
+
+.quick-search-btn {
+    background: linear-gradient(135deg, #b8860b, #d4af37);
+    color: #3b0606;
+    border: none;
+    border-radius: 16px;
+    padding: 5px 12px;
+    font-size: 12.5px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+
+.quick-search-btn:hover {
+    background: linear-gradient(135deg, #ffd700, #ffea00);
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+/* Dropdown danh sách kết quả */
+.quick-search-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 480px;
+    max-width: 92vw;
+    max-height: 420px;
+    overflow-y: auto;
+    background: linear-gradient(180deg, #320508 0%, #1a0204 100%);
+    border: 1.5px solid #d4af37;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85), 0 0 16px rgba(212, 175, 55, 0.3);
+    z-index: 99999;
+    padding: 6px 0;
+    backdrop-filter: blur(8px);
+}
+
+.quick-search-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+.quick-search-dropdown::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.4);
+}
+.quick-search-dropdown::-webkit-scrollbar-thumb {
+    background: #d4af37;
+    border-radius: 3px;
+}
+
+.quick-search-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.quick-search-item:last-child {
+    border-bottom: none;
+}
+
+.quick-search-item:hover,
+.quick-search-item.active {
+    background: rgba(212, 175, 55, 0.22);
+    border-left: 4px solid #ffea00;
+    padding-left: 18px;
+}
+
+.quick-search-item-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #5b0606;
+    border: 1px solid #d4af37;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.quick-search-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.quick-search-item-name {
+    font-size: 13.5px;
+    color: #ffffff;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+.quick-search-item-name .match-highlight {
+    color: #ffea00;
+    font-weight: bold;
+    text-shadow: 0 0 6px rgba(255, 234, 0, 0.4);
+}
+
+.quick-search-item-meta {
+    font-size: 11.5px;
+    color: #e2d299;
+    margin-top: 3px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.quick-search-empty {
+    padding: 18px;
+    text-align: center;
+    color: #e0d0b0;
+    font-size: 13px;
+    font-style: italic;
+}
+
+/* Hiệu ứng làm nổi bật thẻ bài Phả Đồ Cổ Điển khi tìm thấy */
+.tree-node.node-highlighted .card-bg {
+    stroke: #ffea00 !important;
+    stroke-width: 4.5px !important;
+    animation: goldCardPulse 1s infinite alternate ease-in-out;
+}
+
+@keyframes goldCardPulse {
+    0% {
+        filter: drop-shadow(0 0 5px #ffd700);
+        stroke-width: 3.5px;
+    }
+    100% {
+        filter: drop-shadow(0 0 18px #ffea00) drop-shadow(0 0 28px #ff9900);
+        stroke-width: 5.5px;
+    }
+}
+
+/* Hiệu ứng làm nổi bật trong Sách Gia Phả khi tìm thấy */
+@keyframes bookEntryPulse {
+    0% {
+        box-shadow: 0 0 0 rgba(255, 215, 0, 0);
+        border-color: var(--gold);
+    }
+    50% {
+        box-shadow: 0 0 28px rgba(255, 215, 0, 0.9), inset 0 0 16px rgba(255, 215, 0, 0.4);
+        border-color: #ffea00;
+        transform: scale(1.018);
+    }
+    100% {
+        box-shadow: 0 0 0 rgba(255, 215, 0, 0);
+        border-color: var(--gold);
+    }
+}
+
+.entry-highlight-pulse {
+    animation: bookEntryPulse 1.2s ease-in-out 3;
+    border-color: #ffd700 !important;
+}
+

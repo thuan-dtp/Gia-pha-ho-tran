@@ -35,6 +35,26 @@
         justify-content: space-between;
     }
 
+    .quick-search-wrapper {
+        order: -1;
+        width: 100%;
+        margin-bottom: 6px;
+    }
+
+    .quick-search-box {
+        width: 100%;
+    }
+
+    .quick-search-input {
+        width: 100%;
+        flex: 1;
+    }
+
+    .quick-search-dropdown {
+        width: 100%;
+        max-width: 100%;
+    }
+
     .main-nav-bar {
         gap: 4px;
     }

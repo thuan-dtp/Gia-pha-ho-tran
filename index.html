@@ -70,6 +70,18 @@
                     ⛶ Toàn Màn Hình
                 </button>
 
+                <!-- THANH TÌM KIẾM NHANH THÀNH VIÊN TRỰC QUAN -->
+                <div class="quick-search-wrapper" id="quick-search-wrapper">
+                    <div class="quick-search-box">
+                        <input type="text" id="header-quick-search-input" class="quick-search-input" placeholder="Nhập tên cần tìm (VD: Trần Văn Thuần, Trần Văn Khiên)..." autocomplete="off" spellcheck="false" />
+                        <button type="button" class="quick-search-btn" id="btn-quick-search" title="Tìm nhanh thành viên trong gia phả">
+                            🔍 Tìm thành viên
+                        </button>
+                    </div>
+                    <!-- Danh sách thả xuống kết quả trực quan -->
+                    <div class="quick-search-dropdown" id="quick-search-dropdown" style="display: none;"></div>
+                </div>
+
                 <!-- Công tắc bảo mật người còn sống -->
                 <label class="privacy-toggle" title="Tự động ẩn ngày tháng sinh của thế hệ còn sống để bảo vệ quyền riêng tư">
                     <input type="checkbox" id="chk-privacy-mode" checked>

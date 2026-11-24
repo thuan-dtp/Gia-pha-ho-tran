@@ -169,6 +169,249 @@ function initUtilityBar() {
             if (window.bookView) window.bookView.setFilter(branch);
         });
     }
+
+    // 7. Khởi tạo thanh Tìm Kiếm Nhanh Trực Quan Trên Header
+    initQuickSearch();
+}
+
+/**
+ * TÍNH NĂNG: THANH TÌM KIẾM NHANH TRỰC QUAN TRÊN HEADER
+ * Hỗ trợ gõ tiếng Việt có dấu & không dấu, hiển thị kết quả theo định dạng:
+ * "[Họ và Tên] — Đời thứ [Số đời] ([Tên Chi / Nhánh])"
+ * Khi bấm chọn: tự động điều hướng, cuộn/zoom căn giữa và làm nổi bật thành viên trên tab đang xem.
+ */
+function initQuickSearch() {
+    const input = document.getElementById("header-quick-search-input");
+    const dropdown = document.getElementById("quick-search-dropdown");
+    const btnSearch = document.getElementById("btn-quick-search");
+    const wrapper = document.getElementById("quick-search-wrapper");
+
+    if (!input || !dropdown) return;
+
+    let selectedIndex = -1;
+    let currentResults = [];
+
+    // Định dạng tên Chi / Nhánh thân thiện
+    function formatBranchName(rawBranch) {
+        if (!rawBranch) return "Chi Họ Trần Lãng Nam";
+        if (rawBranch.includes("Nhánh ông Vượng")) return "Chi Họ Trần Lãng Nam - Nhánh ông Vượng";
+        if (rawBranch.includes("Nhánh ông Long")) return "Chi Họ Trần Lãng Nam - Nhánh ông Long";
+        if (rawBranch.includes("Nhánh ông Thịnh")) return "Chi Họ Trần Lãng Nam - Nhánh ông Thịnh";
+        if (rawBranch.includes("Chi Cụ Chí Hòa")) return "Chi Họ Trần Lãng Nam - Nhánh Cụ Chí Hòa";
+        if (rawBranch.includes("Lãng Nam")) return "Chi Họ Trần Lãng Nam";
+        if (rawBranch.includes("Triều Trần") || rawBranch === "Trục chính") return "Trục Chính Sử Triều Trần";
+        if (rawBranch === "Chi 1") return "Chi 1 (An Sinh Vương & Hưng Đạo Vương)";
+        if (rawBranch === "Chi 2") return "Chi 2 (Chiêu Minh Vương & Chiêu Văn Vương)";
+        return rawBranch;
+    }
+
+    // Hàm thực hiện tìm kiếm tức thì
+    function doSearch() {
+        if (!window.familyDataManager) return;
+        const dm = window.familyDataManager;
+        const query = input.value.trim();
+
+        if (!query) {
+            dropdown.style.display = "none";
+            dropdown.innerHTML = "";
+            currentResults = [];
+            selectedIndex = -1;
+            return;
+        }
+
+        const rawQ = query.toLowerCase();
+        const cleanQ = dm.removeVietnameseTones(query);
+
+        const allMembers = dm.getAllMembers();
+        const filtered = allMembers.filter(m => {
+            const nameRaw = (m.ho_ten || "").toLowerCase();
+            const nameClean = dm.removeVietnameseTones(m.ho_ten || "");
+            const titleRaw = (m.ten_hieu || "").toLowerCase();
+            const titleClean = dm.removeVietnameseTones(m.ten_hieu || "");
+            const aliasRaw = (m.danh_hieu || "").toLowerCase();
+            const aliasClean = dm.removeVietnameseTones(m.danh_hieu || "");
+
+            return nameRaw.includes(rawQ) || nameClean.includes(cleanQ) ||
+                   titleRaw.includes(rawQ) || titleClean.includes(cleanQ) ||
+                   aliasRaw.includes(rawQ) || aliasClean.includes(cleanQ);
+        });
+
+        // Sắp xếp: Tên khớp bắt đầu bằng từ khóa lên đầu, rồi theo đời thứ
+        filtered.sort((a, b) => {
+            const aNameClean = dm.removeVietnameseTones(a.ho_ten || "");
+            const bNameClean = dm.removeVietnameseTones(b.ho_ten || "");
+            const aStarts = aNameClean.startsWith(cleanQ);
+            const bStarts = bNameClean.startsWith(cleanQ);
+            if (aStarts && !bStarts) return -1;
+            if (!aStarts && bStarts) return 1;
+            return (a.doi_thu || 0) - (b.doi_thu || 0);
+        });
+
+        currentResults = filtered.slice(0, 25);
+        selectedIndex = -1;
+
+        if (currentResults.length === 0) {
+            dropdown.innerHTML = `
+                <div class="quick-search-empty">
+                    Không tìm thấy thành viên nào phù hợp với từ khóa "<strong>${escapeHtml(query)}</strong>".
+                </div>
+            `;
+            dropdown.style.display = "block";
+            return;
+        }
+
+        // Render danh sách thả xuống
+        dropdown.innerHTML = currentResults.map((m, idx) => {
+            const branchText = formatBranchName(m.chi_nhanh);
+            const genderIcon = m.gioi_tinh === "Nữ" ? "👩" : (m.con_song ? "👨" : "🪦");
+            const datesText = m.con_song 
+                ? (window.isPrivacyMode ? "● Còn tại thế" : `Sinh: ${m.ngay_sinh || "—"}`) 
+                : `${m.ngay_sinh || "—"} - ${m.ngay_mat_am ? 'Mất ' + m.ngay_mat_am : 'Đã khuất'}`;
+
+            return `
+                <div class="quick-search-item" data-index="${idx}" data-id="${m.id}">
+                    <div class="quick-search-item-badge">${genderIcon}</div>
+                    <div class="quick-search-item-info">
+                        <div class="quick-search-item-name">
+                            <strong>${escapeHtml(m.ho_ten)}</strong> — Đời thứ ${m.doi_thu || "—"} (${escapeHtml(branchText)})
+                        </div>
+                        <div class="quick-search-item-meta">
+                            <span>📅 ${escapeHtml(datesText)}</span>
+                            ${m.ten_hieu ? `<span>📜 ${escapeHtml(m.ten_hieu)}</span>` : ""}
+                            ${m.danh_hieu ? `<span>🎖️ ${escapeHtml(m.danh_hieu)}</span>` : ""}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join("");
+
+        dropdown.style.display = "block";
+
+        // Gắn sự kiện click từng kết quả
+        dropdown.querySelectorAll(".quick-search-item").forEach(itemEl => {
+            itemEl.addEventListener("click", () => {
+                const memberId = itemEl.getAttribute("data-id");
+                selectMember(memberId);
+            });
+        });
+    }
+
+    // Hàm chọn thành viên và chuyển màn hình
+    function selectMember(memberId) {
+        if (!window.familyDataManager) return;
+        const dm = window.familyDataManager;
+        const member = dm.getMemberById(memberId);
+        if (!member) return;
+
+        // Điền tên vào ô input và đóng dropdown
+        input.value = member.ho_ten;
+        dropdown.style.display = "none";
+
+        const activeTab = localStorage.getItem("last_active_tab") || "tree";
+
+        if (activeTab === "book") {
+            if (window.bookView) {
+                window.bookView.focusMember(memberId);
+            }
+        } else if (activeTab === "tree") {
+            if (window.classicTree) {
+                window.classicTree.focusMember(memberId);
+            }
+        } else if (activeTab === "family") {
+            if (window.familyChart) {
+                window.familyChart.setFocus(memberId);
+            }
+        } else {
+            // Nếu ở Tab Galaxy hoặc Golden, chuyển sang Phả Đồ Cổ Điển để xem trực quan
+            window.switchTab("tree");
+            setTimeout(() => {
+                if (window.classicTree) {
+                    window.classicTree.focusMember(memberId);
+                }
+            }, 300);
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return "";
+        return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Sự kiện gõ phím trên input
+    input.addEventListener("input", () => {
+        doSearch();
+    });
+
+    input.addEventListener("focus", () => {
+        if (input.value.trim()) {
+            doSearch();
+        }
+    });
+
+    // Nút kính lúp
+    if (btnSearch) {
+        btnSearch.addEventListener("click", () => {
+            if (currentResults.length > 0) {
+                const targetIdx = selectedIndex >= 0 ? selectedIndex : 0;
+                selectMember(currentResults[targetIdx].id);
+            } else {
+                doSearch();
+            }
+        });
+    }
+
+    // Điều hướng phím mũi tên & Enter
+    input.addEventListener("keydown", (e) => {
+        if (dropdown.style.display === "none" || currentResults.length === 0) {
+            if (e.key === "Enter") {
+                doSearch();
+            }
+            return;
+        }
+
+        const items = dropdown.querySelectorAll(".quick-search-item");
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            selectedIndex = (selectedIndex + 1) % items.length;
+            updateItemSelection(items);
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+            updateItemSelection(items);
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            const targetIdx = selectedIndex >= 0 ? selectedIndex : 0;
+            if (currentResults[targetIdx]) {
+                selectMember(currentResults[targetIdx].id);
+            }
+        } else if (e.key === "Escape") {
+            dropdown.style.display = "none";
+        }
+    });
+
+    function updateItemSelection(items) {
+        items.forEach((item, idx) => {
+            if (idx === selectedIndex) {
+                item.classList.add("active");
+                item.scrollIntoView({ block: "nearest" });
+            } else {
+                item.classList.remove("active");
+            }
+        });
+    }
+
+    // Đóng dropdown khi nhấp ra ngoài
+    document.addEventListener("click", (e) => {
+        if (wrapper && !wrapper.contains(e.target)) {
+            dropdown.style.display = "none";
+        }
+    });
 }
 
 /**

@@ -155,6 +155,8 @@ class ClassicTree {
 
         const nodeEnter = node.enter().append("g")
             .attr("class", d => `tree-node ${d.data.gioi_tinh === 'Nữ' ? 'node-female' : 'node-male'} ${d.data.con_song ? 'node-alive' : 'node-deceased'}`)
+            .attr("id", d => `tree-node-${d.data.id}`)
+            .attr("data-id", d => d.data.id)
             .attr("transform", d => isHorizontal ? `translate(${source.y0},${source.x0})` : `translate(${source.x0},${source.y0})`)
             .on("click", (event, d) => {
                 // Nhấp vào thẻ bài để xem chi tiết
@@ -419,6 +421,77 @@ class ClassicTree {
             URL.revokeObjectURL(url);
         };
         img.src = url;
+    }
+
+    /**
+     * Tự động phóng to, căn giữa và làm nổi bật thẻ thành viên khi tìm kiếm
+     */
+    focusMember(memberId) {
+        if (!this.container || !window.familyDataManager) return;
+        const dm = window.familyDataManager;
+        const member = dm.getMemberById(memberId);
+        if (!member) return;
+
+        // Nếu đang lọc nhánh mà thành viên không thuộc nhánh đó, chuyển sang Tất cả
+        if (this.branchFilter !== "Tất cả" && !dm.isMemberInBranch(member, this.branchFilter)) {
+            this.branchFilter = "Tất cả";
+            const branchSelect = document.getElementById("global-branch-select");
+            if (branchSelect) branchSelect.value = "Tất cả";
+            this.render();
+        }
+
+        if (!this.rootData) return;
+
+        // Mở rộng tất cả các nút tổ tiên nếu đang bị thu gọn (_children)
+        const expandAncestors = (node) => {
+            if (!node) return false;
+            if (node.data && node.data.id === memberId) return true;
+            const children = (node.children || []).concat(node._children || []);
+            for (const child of children) {
+                if (expandAncestors(child)) {
+                    if (node._children) {
+                        node.children = (node.children || []).concat(node._children);
+                        node._children = null;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        expandAncestors(this.rootData);
+        this.update(this.rootData);
+
+        setTimeout(() => {
+            if (!this.rootData) return;
+            const nodes = this.rootData.descendants();
+            const targetNode = nodes.find(d => d.data && d.data.id === memberId);
+            if (!targetNode || !this.svg || !this.zoom) return;
+
+            const isHorizontal = this.orientation === "horizontal";
+            const targetX = isHorizontal ? targetNode.y : targetNode.x;
+            const targetY = isHorizontal ? targetNode.x : targetNode.y;
+
+            const width = this.container.clientWidth || 1000;
+            const height = this.container.clientHeight || 700;
+            const scale = 1.15;
+
+            const transform = d3.zoomIdentity
+                .translate(width / 2 - scale * targetX, height / 2 - scale * targetY)
+                .scale(scale);
+
+            this.svg.transition().duration(750).call(this.zoom.transform, transform);
+
+            // Làm nổi bật thẻ bài
+            this.g.selectAll(".tree-node").classed("node-highlighted", false);
+            const targetEl = this.g.selectAll(".tree-node").filter(d => d.data && d.data.id === memberId);
+            if (!targetEl.empty()) {
+                targetEl.classed("node-highlighted", true);
+                setTimeout(() => {
+                    targetEl.classed("node-highlighted", false);
+                }, 4500);
+            }
+        }, 220);
     }
 }
 
