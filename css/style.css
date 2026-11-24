@@ -1674,7 +1674,7 @@ body.dark-candle-theme .kinship-label {
 }
 
 /* ==========================================================================
-   TÍNH NĂNG: THANH TÌM KIẾM NHANH THÀNH VIÊN TRỰC QUAN (HEADER QUICK SEARCH)
+   TÍNH NĂNG: NÚT TÌM KIẾM NHANH THÀNH VIÊN SỔ XUỐNG (HEADER QUICK SEARCH POPOVER)
    ========================================================================== */
 .quick-search-wrapper {
     position: relative;
@@ -1682,21 +1682,109 @@ body.dark-candle-theme .kinship-label {
     align-items: center;
 }
 
+.util-btn-search {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--gold);
+    color: #ffffff;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.util-btn-search:hover,
+.util-btn-search.active {
+    background: rgba(184, 134, 11, 0.45);
+    border-color: #ffd700;
+    color: #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.45);
+}
+
+/* Khung tìm kiếm sổ xuống (Popover) */
+.quick-search-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 350px;
+    max-width: 92vw;
+    background: linear-gradient(180deg, #320508 0%, #1a0204 100%);
+    border: 1.5px solid #d4af37;
+    border-radius: 8px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9), 0 0 16px rgba(212, 175, 55, 0.35);
+    z-index: 99999;
+    padding: 10px 12px;
+    backdrop-filter: blur(8px);
+    animation: fadeInSlideDown 0.2s ease-out;
+}
+
+@keyframes fadeInSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.quick-search-popover-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.popover-title {
+    font-size: 12.5px;
+    font-weight: bold;
+    color: #ffd700;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.popover-close-btn {
+    background: transparent;
+    border: none;
+    color: #e2d299;
+    font-size: 15px;
+    cursor: pointer;
+    padding: 1px 6px;
+    border-radius: 4px;
+    line-height: 1;
+    transition: var(--transition);
+}
+
+.popover-close-btn:hover {
+    color: #ff6b6b;
+    background: rgba(255, 255, 255, 0.12);
+}
+
 .quick-search-box {
     display: flex;
     align-items: center;
-    background: rgba(30, 3, 3, 0.75);
-    border: 1.5px solid var(--gold);
-    border-radius: 20px;
-    padding: 2px 4px 2px 14px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 0 6px rgba(0, 0, 0, 0.5);
+    background: rgba(20, 2, 2, 0.85);
+    border: 1px solid #d4af37;
+    border-radius: 6px;
+    padding: 4px 10px;
+    width: 100%;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);
+    transition: all 0.25s ease;
 }
 
 .quick-search-box:focus-within {
     border-color: #ffea00;
-    box-shadow: 0 0 14px rgba(255, 215, 0, 0.4), inset 0 0 8px rgba(212, 175, 55, 0.2);
-    background: rgba(45, 5, 5, 0.9);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4), inset 0 0 4px rgba(0, 0, 0, 0.8);
+    background: rgba(30, 4, 4, 0.95);
 }
 
 .quick-search-input {
@@ -1704,60 +1792,46 @@ body.dark-candle-theme .kinship-label {
     border: none;
     outline: none;
     color: #ffffff;
-    font-size: 13.5px;
-    width: 290px;
-    padding: 5px 8px 5px 0;
+    font-size: 13px;
+    width: 100%;
+    flex: 1;
+    padding: 4px 6px 4px 0;
     font-family: inherit;
 }
 
 .quick-search-input::placeholder {
     color: #c9b085;
     font-style: italic;
-    font-size: 12.5px;
+    font-size: 12px;
 }
 
-.quick-search-btn {
-    background: linear-gradient(135deg, #b8860b, #d4af37);
-    color: #3b0606;
+.quick-search-clear-btn {
+    background: transparent;
     border: none;
-    border-radius: 16px;
-    padding: 5px 12px;
-    font-size: 12.5px;
-    font-weight: bold;
+    color: #c9b085;
+    font-size: 13px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.25s ease;
-    white-space: nowrap;
+    padding: 0 4px;
+    line-height: 1;
+    transition: var(--transition);
 }
 
-.quick-search-btn:hover {
-    background: linear-gradient(135deg, #ffd700, #ffea00);
-    transform: scale(1.03);
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+.quick-search-clear-btn:hover {
+    color: #ffd700;
 }
 
-/* Dropdown danh sách kết quả */
+/* Dropdown danh sách kết quả bên trong Popover */
 .quick-search-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    width: 480px;
-    max-width: 92vw;
-    max-height: 420px;
+    margin-top: 8px;
+    width: 100%;
+    max-height: 330px;
     overflow-y: auto;
-    background: linear-gradient(180deg, #320508 0%, #1a0204 100%);
-    border: 1.5px solid #d4af37;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85), 0 0 16px rgba(212, 175, 55, 0.3);
-    z-index: 99999;
-    padding: 6px 0;
-    backdrop-filter: blur(8px);
+    padding: 2px 0;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 .quick-search-dropdown::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
 }
 .quick-search-dropdown::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.4);
@@ -1768,13 +1842,13 @@ body.dark-candle-theme .kinship-label {
 }
 
 .quick-search-item {
-    padding: 10px 14px;
+    padding: 9px 10px;
     cursor: pointer;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.12);
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .quick-search-item:last-child {
@@ -1784,20 +1858,20 @@ body.dark-candle-theme .kinship-label {
 .quick-search-item:hover,
 .quick-search-item.active {
     background: rgba(212, 175, 55, 0.22);
-    border-left: 4px solid #ffea00;
-    padding-left: 18px;
+    border-left: 3px solid #ffea00;
+    padding-left: 14px;
 }
 
 .quick-search-item-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     background: #5b0606;
     border: 1px solid #d4af37;
-    font-size: 13px;
+    font-size: 12px;
     flex-shrink: 0;
 }
 
@@ -1807,32 +1881,30 @@ body.dark-candle-theme .kinship-label {
 }
 
 .quick-search-item-name {
-    font-size: 13.5px;
+    font-size: 13px;
     color: #ffffff;
     line-height: 1.35;
     word-break: break-word;
 }
 
-.quick-search-item-name .match-highlight {
-    color: #ffea00;
-    font-weight: bold;
-    text-shadow: 0 0 6px rgba(255, 234, 0, 0.4);
+.quick-search-item-name strong {
+    color: #ffd700;
 }
 
 .quick-search-item-meta {
-    font-size: 11.5px;
+    font-size: 11px;
     color: #e2d299;
-    margin-top: 3px;
+    margin-top: 2px;
     display: flex;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
 .quick-search-empty {
-    padding: 18px;
+    padding: 16px 10px;
     text-align: center;
     color: #e0d0b0;
-    font-size: 13px;
+    font-size: 12.5px;
     font-style: italic;
 }
 

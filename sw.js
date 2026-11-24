@@ -3,7 +3,7 @@
  * Lưu trữ và phục vụ toàn bộ ứng dụng khi thiết bị không có mạng Internet.
  */
 
-const CACHE_NAME = "giapha-hotran-v5.9.0-quick-search";
+const CACHE_NAME = "giapha-hotran-v5.9.1-popover-search";
 
 const ASSETS_TO_CACHE = [
     "./",

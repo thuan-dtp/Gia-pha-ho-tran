@@ -35,24 +35,14 @@
         justify-content: space-between;
     }
 
-    .quick-search-wrapper {
-        order: -1;
-        width: 100%;
-        margin-bottom: 6px;
-    }
-
-    .quick-search-box {
-        width: 100%;
-    }
-
-    .quick-search-input {
-        width: 100%;
-        flex: 1;
-    }
-
-    .quick-search-dropdown {
-        width: 100%;
-        max-width: 100%;
+    .quick-search-popover {
+        position: fixed;
+        top: 70px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 92vw;
+        max-width: 360px;
+        right: auto;
     }
 
     .main-nav-bar {

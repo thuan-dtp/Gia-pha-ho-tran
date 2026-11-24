@@ -70,16 +70,25 @@
                     ⛶ Toàn Màn Hình
                 </button>
 
-                <!-- THANH TÌM KIẾM NHANH THÀNH VIÊN TRỰC QUAN -->
+                <!-- NÚT TÌM KIẾM NHANH THÀNH VIÊN SỔ XUỐNG THÔNG MINH -->
                 <div class="quick-search-wrapper" id="quick-search-wrapper">
-                    <div class="quick-search-box">
-                        <input type="text" id="header-quick-search-input" class="quick-search-input" placeholder="Nhập tên cần tìm (VD: Trần Văn Thuần, Trần Văn Khiên)..." autocomplete="off" spellcheck="false" />
-                        <button type="button" class="quick-search-btn" id="btn-quick-search" title="Tìm nhanh thành viên trong gia phả">
-                            🔍 Tìm thành viên
-                        </button>
+                    <button type="button" class="util-btn util-btn-search" id="btn-toggle-quick-search" title="Mở ô tìm nhanh thành viên">
+                        🔍 Tìm thành viên
+                    </button>
+
+                    <!-- Khung tìm kiếm sổ xuống gọn gàng (Popover) -->
+                    <div class="quick-search-popover" id="quick-search-popover" style="display: none;">
+                        <div class="quick-search-popover-header">
+                            <span class="popover-title">🔍 Tìm Thành Viên Gia Phả</span>
+                            <button type="button" class="popover-close-btn" id="btn-close-quick-search" title="Đóng ô tìm kiếm (ESC)">✕</button>
+                        </div>
+                        <div class="quick-search-box">
+                            <input type="text" id="header-quick-search-input" class="quick-search-input" placeholder="Nhập tên cần tìm (VD: Trần Văn Thuần, Trần Văn Khiên)..." autocomplete="off" spellcheck="false" />
+                            <button type="button" class="quick-search-clear-btn" id="btn-clear-search" title="Xóa ô tìm kiếm" style="display: none;">✕</button>
+                        </div>
+                        <!-- Danh sách thả xuống kết quả trực quan -->
+                        <div class="quick-search-dropdown" id="quick-search-dropdown" style="display: none;"></div>
                     </div>
-                    <!-- Danh sách thả xuống kết quả trực quan -->
-                    <div class="quick-search-dropdown" id="quick-search-dropdown" style="display: none;"></div>
                 </div>
 
                 <!-- Công tắc bảo mật người còn sống -->

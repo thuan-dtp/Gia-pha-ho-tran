@@ -175,21 +175,74 @@ function initUtilityBar() {
 }
 
 /**
- * TÍNH NĂNG: THANH TÌM KIẾM NHANH TRỰC QUAN TRÊN HEADER
- * Hỗ trợ gõ tiếng Việt có dấu & không dấu, hiển thị kết quả theo định dạng:
- * "[Họ và Tên] — Đời thứ [Số đời] ([Tên Chi / Nhánh])"
- * Khi bấm chọn: tự động điều hướng, cuộn/zoom căn giữa và làm nổi bật thành viên trên tab đang xem.
+ * TÍNH NĂNG: NÚT TÌM KIẾM NHANH THÀNH VIÊN SỔ XUỐNG THÔNG MINH (POPOVER)
+ * - Nút kính lúp gọn đẹp trên thanh công cụ [🔍 Tìm thành viên].
+ * - Bấm vào sổ ra khung tìm kiếm gọn gàng (320-360px), tự động đặt con trỏ chuột vào ô nhập.
+ * - Hỗ trợ tìm tiếng Việt có dấu & không dấu, hiển thị "[Họ và Tên] — Đời thứ [Số đời] ([Tên Chi / Nhánh])".
+ * - Tự động điều hướng và làm nổi bật thành viên trên tab đang xem.
+ * - Đóng khi bấm ra ngoài, nhấn phím ESC hoặc bấm nút ✕ góc khung.
  */
 function initQuickSearch() {
+    const btnToggle = document.getElementById("btn-toggle-quick-search");
+    const popover = document.getElementById("quick-search-popover");
+    const btnClose = document.getElementById("btn-close-quick-search");
+    const btnClear = document.getElementById("btn-clear-search");
     const input = document.getElementById("header-quick-search-input");
     const dropdown = document.getElementById("quick-search-dropdown");
-    const btnSearch = document.getElementById("btn-quick-search");
     const wrapper = document.getElementById("quick-search-wrapper");
 
-    if (!input || !dropdown) return;
+    if (!btnToggle || !popover || !input || !dropdown) return;
 
     let selectedIndex = -1;
     let currentResults = [];
+
+    // Mở khung tìm kiếm
+    function openSearchPopover() {
+        popover.style.display = "block";
+        btnToggle.classList.add("active");
+        setTimeout(() => {
+            input.focus();
+            if (input.value.trim()) {
+                doSearch();
+            }
+        }, 50);
+    }
+
+    // Đóng khung tìm kiếm
+    function closeSearchPopover() {
+        popover.style.display = "none";
+        btnToggle.classList.remove("active");
+        dropdown.style.display = "none";
+    }
+
+    // Nút mở/tắt khung tìm kiếm
+    btnToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (popover.style.display === "none" || !popover.style.display) {
+            openSearchPopover();
+        } else {
+            closeSearchPopover();
+        }
+    });
+
+    // Nút đóng ✕
+    if (btnClose) {
+        btnClose.addEventListener("click", (e) => {
+            e.stopPropagation();
+            closeSearchPopover();
+        });
+    }
+
+    // Nút xóa nội dung input
+    if (btnClear) {
+        btnClear.addEventListener("click", () => {
+            input.value = "";
+            btnClear.style.display = "none";
+            dropdown.style.display = "none";
+            dropdown.innerHTML = "";
+            input.focus();
+        });
+    }
 
     // Định dạng tên Chi / Nhánh thân thiện
     function formatBranchName(rawBranch) {
@@ -210,6 +263,10 @@ function initQuickSearch() {
         if (!window.familyDataManager) return;
         const dm = window.familyDataManager;
         const query = input.value.trim();
+
+        if (btnClear) {
+            btnClear.style.display = query ? "block" : "none";
+        }
 
         if (!query) {
             dropdown.style.display = "none";
@@ -303,9 +360,9 @@ function initQuickSearch() {
         const member = dm.getMemberById(memberId);
         if (!member) return;
 
-        // Điền tên vào ô input và đóng dropdown
+        // Điền tên vào ô input và đóng popover
         input.value = member.ho_ten;
-        dropdown.style.display = "none";
+        closeSearchPopover();
 
         const activeTab = localStorage.getItem("last_active_tab") || "tree";
 
@@ -353,20 +410,13 @@ function initQuickSearch() {
         }
     });
 
-    // Nút kính lúp
-    if (btnSearch) {
-        btnSearch.addEventListener("click", () => {
-            if (currentResults.length > 0) {
-                const targetIdx = selectedIndex >= 0 ? selectedIndex : 0;
-                selectMember(currentResults[targetIdx].id);
-            } else {
-                doSearch();
-            }
-        });
-    }
-
-    // Điều hướng phím mũi tên & Enter
+    // Điều hướng phím mũi tên & Enter & ESC
     input.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            closeSearchPopover();
+            return;
+        }
+
         if (dropdown.style.display === "none" || currentResults.length === 0) {
             if (e.key === "Enter") {
                 doSearch();
@@ -390,8 +440,6 @@ function initQuickSearch() {
             if (currentResults[targetIdx]) {
                 selectMember(currentResults[targetIdx].id);
             }
-        } else if (e.key === "Escape") {
-            dropdown.style.display = "none";
         }
     });
 
@@ -406,10 +454,16 @@ function initQuickSearch() {
         });
     }
 
-    // Đóng dropdown khi nhấp ra ngoài
+    // Đóng dropdown khi nhấp ra ngoài hoặc nhấn phím ESC toàn cục
     document.addEventListener("click", (e) => {
         if (wrapper && !wrapper.contains(e.target)) {
-            dropdown.style.display = "none";
+            closeSearchPopover();
+        }
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && popover.style.display !== "none") {
+            closeSearchPopover();
         }
     });
 }
