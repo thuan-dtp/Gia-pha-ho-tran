@@ -122,25 +122,44 @@ body {
     font-style: italic;
 }
 
-/* Thanh tiện ích thông minh */
+/* Thanh tiện ích thông minh 2 dòng */
 .utility-toolbar {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
-@media (min-width: 1200px) {
-    .utility-toolbar {
-        flex-wrap: nowrap;
-    }
+/* Ngắt dòng thông minh để nút Quản Trị Chi xuống dòng 2 đầu dòng bên trái */
+.toolbar-break-line {
+    flex-basis: 100%;
+    width: 100%;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.util-btn-admin-row2 {
+    background: linear-gradient(135deg, #a17f1a 0%, #b8860b 100%) !important;
+    border: 1px solid #ffd700 !important;
+    color: #ffffff !important;
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    margin-top: 4px;
+    align-self: flex-start;
+}
+
+.util-btn-admin-row2:hover {
+    background: #ffd700 !important;
+    color: #450a0a !important;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
 }
 
 .util-btn {
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--gold);
     color: #ffffff;
-    padding: 5px 8px;
+    padding: 5px 10px;
     border-radius: 4px;
     cursor: pointer;
     font-size: 12.5px;
@@ -148,7 +167,7 @@ body {
     transition: var(--transition);
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     white-space: nowrap;
 }
 
@@ -1955,5 +1974,117 @@ body.dark-candle-theme .kinship-label {
 .entry-highlight-pulse {
     animation: bookEntryPulse 1.2s ease-in-out 3;
     border-color: #ffd700 !important;
+}
+
+/* ==========================================================================
+   CỤM ĐIỀU KHIỂN GIỌNG ĐỌC TIẾNG VIỆT CHO TỪNG THÀNH VIÊN TRÊN BẢNG TIỂU SỬ
+   ========================================================================== */
+.member-tts-panel {
+    background: linear-gradient(135deg, rgba(42, 6, 8, 0.9) 0%, rgba(20, 2, 4, 0.95) 100%);
+    border: 1.5px solid var(--gold);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 15px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.member-tts-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.member-tts-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-tts-ctrl {
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.btn-tts-play {
+    background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+    color: #ffffff;
+    border: 1px solid #ffd700;
+    box-shadow: 0 2px 8px rgba(185, 28, 28, 0.5);
+}
+.btn-tts-play:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    color: #ffea00;
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.6);
+    transform: translateY(-1px);
+}
+
+.btn-tts-pause {
+    background: rgba(45, 5, 5, 0.85);
+    border: 1px solid var(--gold);
+    color: #ffdf78;
+}
+.btn-tts-pause:hover {
+    background: rgba(184, 134, 11, 0.45);
+    color: #ffffff;
+    border-color: #ffd700;
+}
+
+.btn-tts-stop {
+    background: rgba(25, 25, 25, 0.8);
+    border: 1px solid #999;
+    color: #e5e5e5;
+}
+.btn-tts-stop:hover {
+    background: #450a0a;
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.member-tts-speed {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 3px 8px;
+    border-radius: 16px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.member-tts-speed .speed-label {
+    font-size: 11.5px;
+    color: #d4af37;
+    margin-right: 2px;
+    font-weight: 500;
+}
+
+.btn-tts-speed {
+    background: transparent;
+    border: 1px solid transparent;
+    color: #e5d8b8;
+    border-radius: 12px;
+    padding: 3px 8px;
+    font-size: 11.5px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-tts-speed:hover,
+.btn-tts-speed.active {
+    background: var(--gold);
+    color: #3b0606;
+    border-color: #ffd700;
+    font-weight: bold;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
 }
 

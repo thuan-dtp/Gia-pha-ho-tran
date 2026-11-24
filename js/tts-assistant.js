@@ -27,9 +27,40 @@ class TTSAssistant {
     initVoice() {
         if (!this.synth) return;
         const voices = this.synth.getVoices();
-        // Ưu tiên các giọng tiếng Việt chuẩn
-        this.voice = voices.find(v => v.lang === 'vi-VN' || v.lang === 'vi_VN') ||
-                     voices.find(v => v.lang.startsWith('vi')) || null;
+        if (!voices || voices.length === 0) return;
+
+        // Ưu tiên cao nhất các giọng tiếng Việt Nam chuẩn: HoaiMy, NamMinh, Google Tiếng Việt, vi-VN
+        const priorityPatterns = [
+            /hoaimy/i, /hoài my/i, /namminh/i, /nam minh/i, 
+            /google.*tiếng việt/i, /google.*vietnamese/i, /vietnamese/i
+        ];
+
+        for (let pat of priorityPatterns) {
+            const found = voices.find(v => {
+                const isVi = v.lang && (v.lang.toLowerCase() === 'vi-vn' || v.lang.toLowerCase() === 'vi_vn' || v.lang.toLowerCase().startsWith('vi'));
+                return isVi && pat.test(v.name);
+            });
+            if (found) {
+                this.voice = found;
+                return;
+            }
+        }
+
+        // Ưu tiên tiếp theo: bất kỳ giọng nào mang mã vi-VN hoặc vi_VN
+        const viVn = voices.find(v => v.lang && (v.lang.toLowerCase() === 'vi-vn' || v.lang.toLowerCase() === 'vi_vn'));
+        if (viVn) {
+            this.voice = viVn;
+            return;
+        }
+
+        // Ưu tiên tiếp theo: bất kỳ giọng nào bắt đầu bằng 'vi'
+        const anyVi = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('vi'));
+        if (anyVi) {
+            this.voice = anyVi;
+            return;
+        }
+
+        this.voice = voices[0] || null;
     }
 
     /**
@@ -336,4 +367,32 @@ window.ttsSpeakMember = function(memberId) {
     }
 
     window.ttsAssistant.speak(`Tiểu sử: ${m.ho_ten} (Đời ${m.doi_thu})`, text);
+};
+
+/**
+ * Các hàm điều khiển nhanh giọng đọc cho giao diện bảng tiểu sử
+ */
+window.ttsPause = function() {
+    if (window.ttsAssistant) window.ttsAssistant.pause();
+};
+
+window.ttsResume = function() {
+    if (window.ttsAssistant) window.ttsAssistant.resume();
+};
+
+window.ttsStop = function() {
+    if (window.ttsAssistant) window.ttsAssistant.stop(true);
+};
+
+window.ttsSetRate = function(rate, btnEl) {
+    if (window.ttsAssistant) {
+        window.ttsAssistant.setRate(rate);
+        if (btnEl) {
+            const parent = btnEl.parentElement;
+            if (parent) {
+                parent.querySelectorAll(".btn-tts-speed").forEach(b => b.classList.remove("active"));
+                btnEl.classList.add("active");
+            }
+        }
+    }
 };

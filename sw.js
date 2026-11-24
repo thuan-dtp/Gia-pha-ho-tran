@@ -3,7 +3,7 @@
  * Lưu trữ và phục vụ toàn bộ ứng dụng khi thiết bị không có mạng Internet.
  */
 
-const CACHE_NAME = "giapha-hotran-v5.9.2-toolbar-single-line";
+const CACHE_NAME = "giapha-hotran-v6.0.0-tts-member-controller";
 
 const ASSETS_TO_CACHE = [
     "./",
@@ -24,6 +24,7 @@ const ASSETS_TO_CACHE = [
     "./js/idb-storage.js",
     "./js/auth_manager.js",
     "./js/tts-assistant.js",
+    "./js/tts-helper.js",
     "./js/incense.js",
     "./js/tree-classic.js",
     "./js/family-chart.js",

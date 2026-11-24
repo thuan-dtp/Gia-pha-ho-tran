@@ -339,6 +339,30 @@ class BookView {
 
                     <div class="entry-biography">
                         ${m.danh_hieu ? `<div class="entry-honor">🏅 <strong>Phẩm hàm / Danh vị:</strong> ${m.danh_hieu}</div>` : ''}
+                        
+                        <!-- CỤM ĐIỀU KHIỂN GIỌNG ĐỌC TIẾNG VIỆT CHO TIỂU SỬ -->
+                        <div class="member-tts-panel" id="book-tts-panel-${m.id}" style="margin-bottom: 10px;">
+                            <div class="member-tts-bar">
+                                <div class="member-tts-actions">
+                                    <button type="button" class="btn-tts-ctrl btn-tts-play" onclick="window.ttsSpeakMember('${m.id}')" title="Phát giọng đọc tiếng Việt toàn bộ tiểu sử">
+                                        🔊 Nghe Tiểu Sử
+                                    </button>
+                                    <button type="button" class="btn-tts-ctrl btn-tts-pause" onclick="window.ttsPause()" title="Tạm dừng giọng đọc">
+                                        ⏸️ Tạm Dừng
+                                    </button>
+                                    <button type="button" class="btn-tts-ctrl btn-tts-stop" onclick="window.ttsStop()" title="Dừng đọc hẳn">
+                                        ⏹️ Dừng Hẳn
+                                    </button>
+                                </div>
+                                <div class="member-tts-speed">
+                                    <span class="speed-label">Tốc độ:</span>
+                                    <button type="button" class="btn-tts-speed ${window.ttsAssistant && window.ttsAssistant.rate <= 0.8 ? 'active' : ''}" onclick="window.ttsSetRate(0.75, this)" title="Đọc chậm">🐢 Chậm</button>
+                                    <button type="button" class="btn-tts-speed ${!window.ttsAssistant || (window.ttsAssistant.rate > 0.8 && window.ttsAssistant.rate < 1.15) ? 'active' : ''}" onclick="window.ttsSetRate(0.95, this)" title="Đọc vừa chuẩn">🚶 Vừa</button>
+                                    <button type="button" class="btn-tts-speed ${window.ttsAssistant && window.ttsAssistant.rate >= 1.15 ? 'active' : ''}" onclick="window.ttsSetRate(1.2, this)" title="Đọc nhanh">⚡ Nhanh</button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="entry-text">
                             <strong>Tiểu sử & Sự nghiệp:</strong><br/>
                             ${m.tieu_su || 'Đức độ hiền hòa, trọn đạo làm con, giữ gìn nền nếp gia môn.'}
