@@ -3,7 +3,7 @@
  * Lưu trữ và phục vụ toàn bộ ứng dụng khi thiết bị không có mạng Internet.
  */
 
-const CACHE_NAME = "giapha-hotran-v6.0.0-tts-member-controller";
+const CACHE_NAME = "giapha-hotran-v6.0.1-tts-vietnamese-fix";
 
 const ASSETS_TO_CACHE = [
     "./",

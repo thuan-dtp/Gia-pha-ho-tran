@@ -19,48 +19,86 @@ class TTSAssistant {
         this.floatingBarEl = null;
 
         this.initVoice();
-        if (this.synth && this.synth.onvoiceschanged !== undefined) {
+        if (this.synth) {
+            // Lắng nghe sự kiện nạp danh sách giọng đọc của trình duyệt
             this.synth.onvoiceschanged = () => this.initVoice();
+            if (typeof this.synth.addEventListener === 'function') {
+                this.synth.addEventListener('voiceschanged', () => this.initVoice());
+            }
         }
+    }
+
+    /**
+     * Lọc và khóa cứng giọng đọc Tiếng Việt Nam (vi-VN) chuẩn nhất
+     */
+    getVietnameseVoice() {
+        if (!this.synth) return null;
+        const voices = this.synth.getVoices() || [];
+        if (!voices || voices.length === 0) return null;
+
+        // 1. Nhóm ưu tiên số 1: Giọng Tiếng Việt Nam tự nhiên chất lượng cao
+        const priorityKeywords = [
+            'hoaimy', 'hoài my', 'namminh', 'nam minh', 
+            'tiếng việt', 'tieng viet', 'vietnamese'
+        ];
+
+        for (let kw of priorityKeywords) {
+            const found = voices.find(v => {
+                const name = (v.name || '').toLowerCase();
+                const lang = (v.lang || '').toLowerCase();
+                return (lang.includes('vi') || name.includes(kw)) && name.includes(kw);
+            });
+            if (found) return found;
+        }
+
+        // 2. Nhóm ưu tiên số 2: Bất kỳ giọng nào mang mã vi-VN hoặc vi_VN
+        const viVn = voices.find(v => {
+            const lang = (v.lang || '').toLowerCase();
+            return lang === 'vi-vn' || lang === 'vi_vn';
+        });
+        if (viVn) return viVn;
+
+        // 3. Nhóm ưu tiên số 3: Bất kỳ giọng nào có mã ngôn ngữ bắt đầu bằng hoặc chứa 'vi'
+        const anyVi = voices.find(v => {
+            const lang = (v.lang || '').toLowerCase();
+            return lang.startsWith('vi') || lang.includes('vi');
+        });
+        if (anyVi) return anyVi;
+
+        // 4. Nhóm ưu tiên số 4: Giọng có tên chứa 'vietnam' hoặc 'tiếng việt'
+        const viName = voices.find(v => {
+            const name = (v.name || '').toLowerCase();
+            return name.includes('vietnam') || name.includes('tiếng việt') || name.includes('tieng viet');
+        });
+        if (viName) return viName;
+
+        // TUYỆT ĐỐI không gán voices[0] để không bao giờ bị rơi về giọng tiếng Anh mặc định (David/Zira)
+        return null;
     }
 
     initVoice() {
         if (!this.synth) return;
-        const voices = this.synth.getVoices();
-        if (!voices || voices.length === 0) return;
-
-        // Ưu tiên cao nhất các giọng tiếng Việt Nam chuẩn: HoaiMy, NamMinh, Google Tiếng Việt, vi-VN
-        const priorityPatterns = [
-            /hoaimy/i, /hoài my/i, /namminh/i, /nam minh/i, 
-            /google.*tiếng việt/i, /google.*vietnamese/i, /vietnamese/i
-        ];
-
-        for (let pat of priorityPatterns) {
-            const found = voices.find(v => {
-                const isVi = v.lang && (v.lang.toLowerCase() === 'vi-vn' || v.lang.toLowerCase() === 'vi_vn' || v.lang.toLowerCase().startsWith('vi'));
-                return isVi && pat.test(v.name);
-            });
-            if (found) {
-                this.voice = found;
-                return;
-            }
+        const viVoice = this.getVietnameseVoice();
+        if (viVoice) {
+            this.voice = viVoice;
+            console.log("TTS Assistant: Đã khóa cứng giọng đọc tiếng Việt:", viVoice.name, `(${viVoice.lang})`);
+        } else {
+            this.voice = null;
         }
+    }
 
-        // Ưu tiên tiếp theo: bất kỳ giọng nào mang mã vi-VN hoặc vi_VN
-        const viVn = voices.find(v => v.lang && (v.lang.toLowerCase() === 'vi-vn' || v.lang.toLowerCase() === 'vi_vn'));
-        if (viVn) {
-            this.voice = viVn;
-            return;
+    /**
+     * Thông báo thân thiện khi hệ điều hành máy tính chưa cài sẵn giọng đọc tiếng Việt
+     */
+    showDefaultVoiceNotice() {
+        const msg = "Trình duyệt đang dùng giọng mặc định, khuyên dùng Microsoft Edge hoặc Chrome có kết nối mạng để nghe giọng Tiếng Việt Nam chuẩn nhất.";
+        if (window.showIndexToast) {
+            window.showIndexToast(msg, false);
+        } else if (window.showAdminToast) {
+            window.showAdminToast(msg, false);
+        } else {
+            console.warn(msg);
         }
-
-        // Ưu tiên tiếp theo: bất kỳ giọng nào bắt đầu bằng 'vi'
-        const anyVi = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('vi'));
-        if (anyVi) {
-            this.voice = anyVi;
-            return;
-        }
-
-        this.voice = voices[0] || null;
     }
 
     /**
@@ -103,6 +141,15 @@ class TTSAssistant {
         // Dừng câu đọc trước nếu đang chạy
         this.stop(false);
 
+        // Bắt buộc gọi getVoices() và tìm giọng tiếng Việt ngay trước khi bắt đầu đọc
+        const viVoice = this.getVietnameseVoice();
+        if (viVoice) {
+            this.voice = viVoice;
+        } else {
+            this.voice = null;
+            this.showDefaultVoiceNotice();
+        }
+
         this.currentTitle = title || "Đang đọc gia phả...";
         this.currentChunks = this.splitIntoSentences(fullText);
         this.chunkIndex = 0;
@@ -125,11 +172,19 @@ class TTSAssistant {
 
         const sentence = this.currentChunks[this.chunkIndex];
         const utter = new SpeechSynthesisUtterance(sentence);
+
+        // Bắt buộc gán utterance.lang = 'vi-VN' cho mọi đoạn đọc
         utter.lang = 'vi-VN';
         utter.rate = this.rate;
         utter.pitch = 1.0;
-        if (this.voice) {
-            utter.voice = this.voice;
+
+        // Bắt buộc gọi getVoices() và gán thẳng utterance.voice vào giọng Tiếng Việt Nam chuẩn
+        const currentViVoice = this.getVietnameseVoice() || this.voice;
+        if (currentViVoice) {
+            this.voice = currentViVoice;
+            utter.voice = currentViVoice;
+        } else {
+            // Không gán utter.voice để trình duyệt nhận diện theo utter.lang = 'vi-VN'
         }
 
         utter.onend = () => {
