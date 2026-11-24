@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUẢN TRỊ GIA PHẢ HỌ TRẦN VIỆT NAM — PHÂN QUYỀN ĐA CHI</title>
+    
+    <!-- CSS Modules -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <style>
+        .admin-page-wrap {
+            max-width: 1440px;
+            margin: 24px auto;
+            padding: 0 20px 60px;
+        }
+
+        .admin-login-box {
+            max-width: 520px;
+            margin: 60px auto;
+            background: var(--paper-card);
+            border: 3px solid var(--gold);
+            border-radius: 8px;
+            padding: 36px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .login-pin-input {
+            width: 100%;
+            text-align: center;
+            letter-spacing: 6px;
+            font-size: 22px;
+            font-weight: bold;
+            padding: 12px;
+            border: 2px solid var(--gold);
+            border-radius: 6px;
+            background: var(--paper-bg);
+            color: var(--primary-red);
+            margin: 18px 0;
+        }
+
+        .pin-hints-box {
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px dashed var(--gold);
+            border-radius: 6px;
+            padding: 14px;
+            font-size: 13.5px;
+            margin-top: 20px;
+            text-align: left;
+            line-height: 1.7;
+        }
+
+        .pin-hints-box ul {
+            margin-left: 20px;
+            margin-top: 6px;
+        }
+
+        /* Dashboard Styles */
+        .admin-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-red-light) 100%);
+            color: #ffffff;
+            padding: 16px 24px;
+            border-radius: 8px 8px 0 0;
+            border-bottom: 3px solid var(--gold);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .admin-session-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-role-tag {
+            background: var(--gold);
+            color: var(--primary-red-dark);
+            font-size: 13.5px;
+            font-weight: bold;
+            padding: 5px 14px;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .badge-branch-tag {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--gold-light);
+            color: #ffdf78;
+            font-size: 13.5px;
+            padding: 5px 14px;
+            border-radius: 12px;
+        }
+
+        /* 3 Nút Bấm Lớn Nổi Bật Dành Cho Người Không Rành Công Nghệ */
+        .primary-actions-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            background: rgba(212, 175, 55, 0.08);
+            padding: 20px;
+            border: 1px solid var(--paper-border);
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .btn-big-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 16px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border: 2px solid;
+            text-decoration: none;
+        }
+
+        .btn-big-action .btn-title {
+            font-size: 15.5px;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-big-action .btn-desc {
+            font-size: 12px;
+            font-weight: normal;
+            opacity: 0.9;
+        }
+
+        .btn-big-template {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: #ffffff;
+            border-color: #60a5fa;
+        }
+        .btn-big-template:hover {
+            background: #1e40af;
+            box-shadow: 0 0 15px rgba(96, 165, 250, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-big-upload {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            color: #ffffff;
+            border-color: #34d399;
+        }
+        .btn-big-upload:hover {
+            background: #047857;
+            box-shadow: 0 0 15px rgba(52, 211, 153, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-big-backup {
+            background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+            color: #ffffff;
+            border-color: #fbbf24;
+        }
+        .btn-big-backup:hover {
+            background: #92400e;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* ================= KHU VỰC QUẢN LÝ THÀNH VIÊN TRỰC TIẾP (SỬA LẺ NHANH) ================= */
+        .member-management-panel {
+            background: var(--paper-card);
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            margin-top: 24px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #4c0505 0%, #7f1d1d 100%);
+            border-bottom: 2px solid var(--gold);
+            color: #ffffff;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .panel-title-group h3 {
+            margin: 0;
+            font-size: 18px;
+            font-family: var(--font-royal);
+            letter-spacing: 0.5px;
+            color: #ffffff;
+        }
+
+        .panel-subtitle {
+            margin-top: 4px;
+            font-size: 13.5px;
+            color: #fef08a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dot-separator {
+            opacity: 0.6;
+        }
+
+        /* Nút thêm 1 người mới nổi bật */
+        .btn-add-member-prominent {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: #ffffff;
+            border: 2px solid #a7f3d0;
+            font-size: 15px;
+            font-weight: bold;
+            padding: 10px 22px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
+            transition: all 0.2s ease;
+        }
+
+        .btn-add-member-prominent:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.6);
+        }
+
+        /* Thanh tìm kiếm nhanh & lọc */
+        .table-search-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            background: rgba(212, 175, 55, 0.08);
+            border-bottom: 1px solid var(--paper-border);
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .search-box-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            flex: 1;
+            min-width: 280px;
+            max-width: 500px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            font-size: 16px;
+            color: var(--gold-dark);
+            pointer-events: none;
+        }
+
+        .search-input-prominent {
+            width: 100%;
+            padding: 10px 36px 10px 38px;
+            font-size: 14.5px;
+            border: 2px solid var(--gold);
+            border-radius: 6px;
+            background: var(--paper-bg);
+            color: var(--text-dark);
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input-prominent:focus {
+            border-color: var(--primary-red);
+            box-shadow: 0 0 10px rgba(139, 0, 0, 0.25);
+        }
+
+        .btn-clear-search {
+            position: absolute;
+            right: 10px;
+            background: transparent;
+            border: none;
+            font-size: 15px;
+            color: #888;
+            cursor: pointer;
+            padding: 4px 8px;
+            line-height: 1;
+        }
+
+        .btn-clear-search:hover {
+            color: var(--primary-red);
+        }
+
+        .quick-filters-wrap {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .form-control-sm {
+            padding: 8px 12px;
+            font-size: 13.5px;
+            border: 1px solid var(--gold);
+            border-radius: 4px;
+            background: var(--paper-bg);
+            color: var(--text-dark);
+            font-family: inherit;
+        }
+
+        /* Bảng danh sách thành viên */
+        .admin-table-wrap {
+            padding: 0;
+            overflow-x: auto;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .admin-table th {
+            background: #500707;
+            color: #ffdf78;
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 2px solid var(--gold);
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .admin-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--paper-border);
+            vertical-align: middle;
+        }
+
+        .admin-table tr:hover {
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .badge-gen {
+            background: var(--gold);
+            color: #3a0303;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .badge-alive {
+            color: #15803d;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge-deceased {
+            color: #b91c1c;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge-branch-cell {
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #78350f;
+            display: inline-block;
+        }
+
+        /* Nút Sửa & Xóa trên từng dòng */
+        .btn-row-edit {
+            background: #fef08a;
+            border: 1px solid #ca8a04;
+            color: #854d0e;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s;
+        }
+
+        .btn-row-edit:hover {
+            background: #fde047;
+            box-shadow: 0 2px 8px rgba(202, 138, 4, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-row-delete {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s;
+            margin-left: 4px;
+        }
+
+        .btn-row-delete:hover {
+            background: #fecaca;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .admin-secondary-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            background: var(--paper-card);
+            padding: 14px 20px;
+            border-top: 1px solid var(--paper-border);
+            align-items: center;
+        }
+
+        /* Modal Styles Upgrade */
+        .modal-section-group {
+            background: rgba(212, 175, 55, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .modal-section-title {
+            font-size: 14.5px;
+            font-weight: bold;
+            color: var(--primary-red);
+            border-bottom: 1px dashed var(--gold);
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .radio-status-wrap {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            margin-top: 6px;
+        }
+
+        .radio-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid var(--paper-border);
+            background: var(--paper-bg);
+            transition: all 0.2s;
+        }
+
+        .radio-chip input[type="radio"] {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        /* Toast Thông Báo Thành Công */
+        .admin-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #065f46;
+            color: #ffffff;
+            border: 2px solid #34d399;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            animation: toastSlideIn 0.25s ease-out;
+        }
+
+        @keyframes toastSlideIn {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Thanh Tab Điều Hướng Phân Khu Quản Trị */
+        .admin-nav-tabs-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            border-bottom: 2px solid var(--gold);
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .admin-nav-tab-btn {
+            background: rgba(212, 175, 55, 0.15);
+            border: 1.5px solid var(--gold);
+            color: var(--primary-red);
+            font-size: 14.5px;
+            font-weight: bold;
+            padding: 9px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .admin-nav-tab-btn:hover {
+            background: rgba(212, 175, 55, 0.3);
+        }
+
+        .admin-nav-tab-btn.active {
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-red-light) 100%);
+            color: #ffffff;
+            border-color: var(--gold-light);
+            box-shadow: 0 4px 10px rgba(139, 0, 0, 0.35);
+        }
+
+        /* Cây Phân Quyền Đa Cấp */
+        .auth-tree-card {
+            background: var(--paper-card);
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+
+        .auth-node-item {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1.5px solid var(--gold);
+            border-radius: 6px;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+
+        .auth-node-level-1 { border-left: 6px solid #b91c1c; }
+        .auth-node-level-2 { border-left: 6px solid #1d4ed8; margin-left: 24px; }
+        .auth-node-level-3 { border-left: 6px solid #047857; margin-left: 48px; }
+        .auth-node-level-4 { border-left: 6px solid #b45309; margin-left: 72px; }
+
+        .auth-badge-role {
+            font-size: 12.5px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        /* Thẻ Thao Tác Audit Log */
+        .audit-action-tag {
+            font-size: 11.5px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        .audit-login { background: #dbeafe; color: #1e40af; }
+        .audit-update { background: #fef3c7; color: #92400e; }
+        .audit-create { background: #d1fae5; color: #065f46; }
+        .audit-delete { background: #fee2e2; color: #991b1b; }
+        .audit-auth { background: #f3e8ff; color: #6b21a8; }
+
+    </style>
+</head>
+<body>
+
+    <!-- ================= HEADER QUẢN TRỊ ================= -->
+    <header class="app-header">
+        <div class="header-top">
+            <div class="brand-section">
+                <div class="brand-seal">
+                    <span>陳</span>
+                </div>
+                <div class="brand-text">
+                    <h1>TRUNG TÂM QUẢN TRỊ GIA PHẢ HỌ TRẦN VIỆT NAM</h1>
+                    <div class="brand-sub">Phân quyền đa cấp theo Chi / Cành • Thao tác trực tiếp dễ dàng • Chạy 100% Ngoại tuyến</div>
+                </div>
+            </div>
+
+            <div class="utility-toolbar">
+                <a href="index.html" class="btn-royal" style="background: #2563eb; border-color: #60a5fa;">
+                    👁️ Trở Về Xem Phả Hệ
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-page-wrap">
+        
+        <!-- ================= 1. MÀN HÌNH ĐĂNG NHẬP MÃ PIN ================= -->
+        <section id="admin-login-section" class="admin-login-box">
+            <h2 class="text-gold" style="font-size: 24px; margin-bottom: 8px;">🔐 ĐĂNG NHẬP BAN QUẢN TRỊ</h2>
+            <p style="font-size: 14px; color: var(--text-muted);">Vui lòng nhập Mã PIN của Đại Tộc, Trưởng Chi hoặc Trưởng Cành để thao tác.</p>
+
+            <form id="form-admin-login">
+                <input type="password" id="input-admin-pin" class="login-pin-input" maxlength="16" placeholder="Nhập mật khẩu quản trị..." required autofocus>
+                <button type="submit" class="btn-royal w-100" style="padding: 12px; font-size: 16px;">Đăng Nhập Quản Trị</button>
+            </form>
+
+            <div style="margin-top: 14px; text-align: center;">
+                <a href="javascript:void(0)" id="link-admin-forgot-pin" style="color: var(--primary-red); font-size: 13.5px; font-weight: bold; text-decoration: underline;">
+                    ❓ Quên mật khẩu? Tự đặt lại bằng Câu hỏi bảo mật hoặc Mã khôi phục
+                </a>
+            </div>
+        </section>
+
+        <!-- ================= 2. BẢNG ĐIỀU KHIỂN DASHBOARD ================= -->
+        <section id="admin-dashboard-section" style="display: none;">
+            
+            <!-- Top bar dashboard -->
+            <div class="admin-top-bar">
+                <div class="admin-session-info">
+                    <span id="admin-role-badge" class="badge-role-tag">Admin</span>
+                    <span id="admin-branch-badge" class="badge-branch-tag">Quyền hạn</span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-royal-sm" id="btn-create-branch-pin" style="display: none; background: #0284c7; border-color: #38bdf8;">➕ Cấp PIN Chi Mới</button>
+                    <button class="btn-royal-sm" id="btn-change-pin" style="background: #a17f1a; border-color: #ffd700;">🔑 Đổi Mật Khẩu Của Tôi</button>
+                    <button class="btn-royal-sm-outline" id="btn-admin-logout" style="border-color: #fca5a5; color: #fee2e2;">🚪 Đăng Xuất</button>
+                </div>
+            </div>
+
+            <!-- 3 NÚT BẤM LỚN TIẾNG VIỆT CHO NGƯỜI DÙNG PHỔ THÔNG -->
+            <div class="primary-actions-row">
+                <!-- Nút 1: Tải template Excel -->
+                <button class="btn-big-action btn-big-template" id="btn-download-excel-template">
+                    <span style="font-size: 26px;">📥</span>
+                    <span class="btn-title">1. TẢI BẢNG MẪU EXCEL VỀ MÁY</span>
+                    <span class="btn-desc">Tải file Excel chuẩn hóa về máy tính để điền thông tin con cháu khi cần</span>
+                </button>
+
+                <!-- Nút 2: Nhập file Excel -->
+                <label class="btn-big-action btn-big-upload">
+                    <span style="font-size: 26px;">📤</span>
+                    <span class="btn-title">2. CHỌN FILE EXCEL CẬP NHẬT HÀNG LOẠT</span>
+                    <span class="btn-desc">Nạp hàng chục/hàng trăm thành viên nhanh từ file Excel vào máy</span>
+                    <input type="file" id="input-upload-excel" accept=".xlsx, .xls" style="display: none;">
+                </label>
+
+                <!-- Nút 3: Xuất sao lưu Excel -->
+                <button class="btn-big-action btn-big-backup" id="btn-export-excel-full">
+                    <span style="font-size: 26px;">💾</span>
+                    <span class="btn-title">3. LƯU BẢN DỰ PHÒNG RA MÁY (EXCEL)</span>
+                    <span class="btn-desc">Xuất toàn bộ gia phả hiện tại ra file Excel để cất giữ an toàn</span>
+                </button>
+            </div>
+
+            <!-- THANH 4 TAB ĐIỀU HƯỚNG PHÂN KHU QUẢN TRỊ -->
+            <div class="admin-nav-tabs-bar">
+                <button class="admin-nav-tab-btn active" id="btn-tab-members" onclick="window.switchAdminTab('members')">
+                    📋 1. Danh Sách Thành Viên & Sửa Nhanh
+                </button>
+                <button class="admin-nav-tab-btn" id="btn-tab-auth-tree" onclick="window.switchAdminTab('auth-tree')">
+                    🌳 2. Cây Phân Quyền 4 Tầng & Cấp Quyền
+                </button>
+                <button class="admin-nav-tab-btn" id="btn-tab-audit-log" onclick="window.switchAdminTab('audit-log')">
+                    📜 3. Nhật Ký Hoạt Động (Audit Log)
+                </button>
+                <button class="admin-nav-tab-btn" id="btn-tab-zalo-sync" onclick="window.switchAdminTab('zalo-sync')">
+                    🔄 4. Gói Đồng Bộ Zalo Với Tổng Quản
+                </button>
+            </div>
+
+            <!-- ================= PHÂN KHU 1: QUẢN TRỊ THÀNH VIÊN TRỰC TIẾP (SỬA LẺ NHANH) ================= -->
+            <div class="member-management-panel" id="panel-admin-members">
+                
+                <!-- Header của panel thành viên -->
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <h3 class="panel-title" id="panel-branch-title">
+                            📋 DANH SÁCH THÀNH VIÊN: <span id="display-current-branch-name" class="text-gold">CHI HỌ TRẦN LÃNG NAM</span>
+                        </h3>
+                        <div class="panel-subtitle">
+                            <span>Tổng số trong chi: <strong id="count-total-branch-members" class="text-gold">0</strong> người</span>
+                            <span class="dot-separator">•</span>
+                            <span>Đang hiển thị: <strong id="count-filtered-members">0</strong> người</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Nút Thêm 1 người mới to nổi bật -->
+                    <button class="btn-add-member-prominent" id="btn-quick-add-member">
+                        <span style="font-size: 18px;">➕</span> THÊM 1 NGƯỜI MỚI VÀO CHI
+                    </button>
+                </div>
+
+                <!-- Thanh tìm kiếm nhanh và bộ lọc -->
+                <div class="table-search-toolbar">
+                    <div class="search-box-wrap">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="search-admin-input" class="search-input-prominent" placeholder="Nhập tên người cần tìm (ví dụ: Thuần, Hưng, Long, Đức, Nguyên...) hoặc mã ID..." autocomplete="off">
+                        <button type="button" id="btn-clear-search" class="btn-clear-search" title="Xóa tìm kiếm" style="display: none;">✖</button>
+                    </div>
+
+                    <div class="quick-filters-wrap">
+                        <div id="wrap-filter-branch-admin" style="display: none; align-items: center; gap: 8px;">
+                            <label style="font-weight: bold; font-size: 13.5px;">Chi/Nhánh:</label>
+                            <select id="filter-branch-admin" class="form-control-sm" style="min-width: 220px;">
+                                <option value="Tất cả">🌿 Toàn cảnh Đại Tộc Họ Trần</option>
+                                <option value="Chi Lãng Nam">🌾 Chi Họ Trần Lãng Nam (Đời 1 - 24)</option>
+                                <option value="Chi Cụ Chí Hòa">🏡 Phân nhánh Cụ Chí Hòa (Đời 20 - 24)</option>
+                                <option value="Chi Cụ Chí Hòa - Nhánh ông Long">🔹 Nhánh ông Long (Đời 21 - 23)</option>
+                                <option value="Chi Cụ Chí Hòa - Nhánh ông Thịnh">🔹 Nhánh ông Thịnh (Đời 21 - 23)</option>
+                                <option value="Chi Cụ Chí Hòa - Nhánh ông Vượng">🔹 Nhánh ông Vượng (Đời 21 - 24)</option>
+                                <option value="Trục chính">🏛️ Trục chính sử Triều Trần</option>
+                                <option value="Chi 1">⚔️ Chi 1 (An Sinh Vương & Hưng Đạo Vương)</option>
+                                <option value="Chi 2">📜 Chi 2 (Chiêu Minh Vương & Chiêu Văn Vương)</option>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label style="font-weight: bold; font-size: 13.5px;">Tình trạng:</label>
+                            <select id="filter-status-admin" class="form-control-sm">
+                                <option value="all">Tất cả tình trạng</option>
+                                <option value="alive">🟢 Còn sống (Tại thế)</option>
+                                <option value="deceased">🕊️ Đã khuất (Đã quy tiên)</option>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label style="font-weight: bold; font-size: 13.5px;">Thế hệ:</label>
+                            <select id="filter-generation-admin" class="form-control-sm">
+                                <option value="all">Tất cả các Đời</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng danh sách thành viên -->
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 75px; text-align: center;">Đời</th>
+                                <th style="min-width: 170px;">Họ và Tên</th>
+                                <th style="width: 85px; text-align: center;">Giới Tính</th>
+                                <th style="min-width: 140px;">Tình Trạng Sinh/Tử</th>
+                                <th style="min-width: 160px;">Thân Sinh (Cha/Mẹ)</th>
+                                <th style="min-width: 160px;">Phối Ngẫu (Vợ/Chồng)</th>
+                                <th style="min-width: 150px;">Chi Phái / Cành</th>
+                                <th style="width: 170px; text-align: center;">Thao Tác Nhanh</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-members-tbody">
+                            <!-- Nạp động qua JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Chân bảng: Tiện ích mở rộng -->
+                <div class="admin-secondary-actions">
+                    <button class="btn-royal-sm" id="btn-export-branch-js" style="background: #d97706; border-color: #fbbf24;">
+                        💾 Xuất Tệp data_chi_X.js Cho Chi Này
+                    </button>
+                    <button class="btn-royal-sm-outline" id="btn-sync-gsheet">
+                        🔄 Đồng Bộ Từ Google Sheets
+                    </button>
+                    <span style="margin-left: auto; font-size: 13px; color: var(--text-muted);">
+                        💡 Mẹo: Bấm nút <strong>[✏️ Sửa]</strong> trực tiếp trên từng người để đổi tên, ngày sinh, ngày giỗ hoặc học vị mà không cần mở Excel.
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- ================= PHÂN KHU 2: CÂY PHÂN QUYỀN 4 TẦNG & CẤP QUYỀN ================= -->
+            <div class="member-management-panel" id="panel-admin-auth-tree" style="display: none;">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <h3 class="panel-title">
+                            🌳 CÂY PHÂN QUYỀN THỪA KẾ THEO PHẢ HỆ ĐẠI TỘC
+                        </h3>
+                        <div class="panel-subtitle">
+                            <span>Mô hình 4 tầng: Tổng Quản Đại Tộc ➔ Trưởng Chi ➔ Trưởng Cành ➔ Người Ghi Chép</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-add-member-prominent" id="btn-open-delegate-modal">
+                        <span style="font-size: 18px;">➕</span> CẤP QUYỀN MỚI CHO CON CHÁU
+                    </button>
+                </div>
+
+                <div style="padding: 20px;">
+                    <div style="background: rgba(212, 175, 55, 0.1); border: 1px dashed var(--gold); border-radius: 6px; padding: 14px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.7;">
+                        <strong>📌 Nguyên tắc phân quyền thừa kế an toàn (Serverless & SHA-256):</strong><br>
+                        • <strong>Cấp 1 — Tổng Quản Đại Tộc (Trần Văn Thuần):</strong> Toàn quyền cả đại tộc, giám sát tất cả các chi, tạo tài khoản và reset mã kích hoạt cho bất kỳ ai.<br>
+                        • <strong>Cấp 2 — Trưởng Chi (Ví dụ Chi Lãng Nam):</strong> Quản lý toàn bộ 24 đời của chi; thêm/sửa thành viên chi và tự tạo/cấp quyền cho các Trưởng Cành con bên dưới.<br>
+                        • <strong>Cấp 3 — Trưởng Cành (Cụ Long, Thịnh, Vượng):</strong> Chỉ sửa thành viên đúng cành mình; có quyền cấp tài khoản phụ (người ghi chép) cho con cháu ngay trong cành.<br>
+                        • <strong>Cấp 4 — Người Ghi Chép:</strong> Được ủy quyền nhập liệu, bổ sung thông tin trong phạm vi cành được phân công.
+                    </div>
+
+                    <!-- Danh sách sơ đồ cây tài khoản -->
+                    <div id="auth-tree-container">
+                        <!-- Nạp động qua JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PHÂN KHU 3: NHẬT KÝ HOẠT ĐỘNG (AUDIT LOG) ================= -->
+            <div class="member-management-panel" id="panel-admin-audit-log" style="display: none;">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <h3 class="panel-title">
+                            📜 NHẬT KÝ HOẠT ĐỘNG KIỂM TOÁN (AUDIT LOG)
+                        </h3>
+                        <div class="panel-subtitle">
+                            <span>Ghi nhận minh bạch mọi thao tác Thêm, Sửa, Xóa, Đổi PIN để bảo tồn tính trung thực của phả hệ</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-royal-sm" id="btn-refresh-audit-log" style="background: #0284c7; border-color: #38bdf8;">
+                            🔄 Làm Mới
+                        </button>
+                        <button class="btn-royal-sm-outline" id="btn-clear-audit-log" style="border-color: #fca5a5; color: #fee2e2; display: none;">
+                            🗑️ Xóa Nhật Ký (Chỉ Tổng Quản)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 160px;">Thời Gian</th>
+                                <th style="min-width: 170px;">Người Thực Hiện</th>
+                                <th style="width: 130px; text-align: center;">Hành Động</th>
+                                <th style="min-width: 170px;">Đối Tượng</th>
+                                <th style="min-width: 250px;">Chi Tiết Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-audit-log-tbody">
+                            <!-- Nạp động qua JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ================= PHÂN KHU 4: ĐỒNG BỘ GÓI ZALO VỚI TỔNG QUẢN ================= -->
+            <div class="member-management-panel" id="panel-admin-zalo-sync" style="display: none;">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <h3 class="panel-title">
+                            🔄 ĐỒNG BỘ DỮ LIỆU ĐA CHI QUA ZALO
+                        </h3>
+                        <div class="panel-subtitle">
+                            <span>Giải pháp kết nối liên chi không cần server: Xuất gói JSON từ máy người dùng gửi Zalo cho Tổng Quản duyệt nạp</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <!-- Cột 1: Dành cho Trưởng Chi / Trưởng Cành -->
+                    <div style="background: rgba(30, 58, 138, 0.08); border: 2px solid #3b82f6; border-radius: 8px; padding: 20px;">
+                        <h4 style="color: #1e40af; font-size: 17px; margin-top: 0; display: flex; align-items: center; gap: 8px;">
+                            📤 BƯỚC 1: XUẤT GÓI DỮ LIỆU ĐỂ GỬI QUA ZALO
+                        </h4>
+                        <p style="font-size: 14px; line-height: 1.6; color: var(--text-dark);">
+                            Dành cho Trưởng Chi và các Trưởng Cành sau khi đã thêm/sửa thành viên mới của cành mình:
+                        </p>
+                        <ol style="font-size: 13.5px; line-height: 1.8; margin-left: 20px; color: var(--text-dark);">
+                            <li>Bấm nút bên dưới để tải gói dữ liệu cập nhật về máy tính / điện thoại.</li>
+                            <li>Mở ứng dụng Zalo, gửi file này cho <strong>Tổng Quản Trần Văn Thuần</strong>.</li>
+                            <li>Tổng Quản sẽ duyệt và nạp vào bản phả hệ chung toàn quốc.</li>
+                        </ol>
+                        <div style="margin-top: 20px;">
+                            <button class="btn-royal w-100" id="btn-export-zalo-dashboard" style="background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%); border-color: #60a5fa; padding: 12px; font-size: 15px;">
+                                📥 TẢI GÓI DỮ LIỆU CHI NÀY ĐỂ GỬI ZALO
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cột 2: Dành cho Tổng Quản Đại Tộc -->
+                    <div style="background: rgba(6, 95, 70, 0.08); border: 2px solid #10b981; border-radius: 8px; padding: 20px;">
+                        <h4 style="color: #065f46; font-size: 17px; margin-top: 0; display: flex; align-items: center; gap: 8px;">
+                            📥 BƯỚC 2: PHÊ DUYỆT & GỘP GÓI ZALO (TỔNG QUẢN)
+                        </h4>
+                        <p style="font-size: 14px; line-height: 1.6; color: var(--text-dark);">
+                            Dành riêng cho <strong>Tổng Quản Đại Tộc (Trần Văn Thuần)</strong> khi nhận được file đồng bộ từ các Trưởng Chi / Trưởng Cành gửi qua Zalo:
+                        </p>
+                        <div style="margin-top: 16px;">
+                            <label class="btn-royal w-100" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-color: #34d399; padding: 12px; font-size: 15px; cursor: pointer; text-align: center; display: block;">
+                                📂 CHỌN TỆP DỮ LIỆU ZALO ĐỂ NẠP
+                                <input type="file" id="input-import-zalo" accept=".json" style="display: none;">
+                            </label>
+                        </div>
+                        <div id="zalo-import-summary" style="margin-top: 14px; font-size: 13.5px; color: #065f46; font-weight: bold; display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <!-- ================= MODAL THÊM / SỬA THÀNH VIÊN TRỰC QUAN ================= -->
+    <div class="modal-overlay" id="modal-member-crud">
+        <div class="modal-container" style="max-width: 840px;">
+            <button class="modal-close-btn">&times;</button>
+            <div class="modal-body">
+                <h3 id="modal-crud-title" class="text-gold" style="border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 18px; font-family: var(--font-royal); font-size: 20px;">
+                    Chỉnh Sửa Thông Tin Thành Viên
+                </h3>
+
+                <form id="form-member-crud">
+                    
+                    <!-- 1. THÔNG TIN CÁ NHÂN & TÌNH TRẠNG -->
+                    <div class="modal-section-group">
+                        <div class="modal-section-title">
+                            <span>👤 1. THÔNG TIN NHÂN THÂN & TÌNH TRẠNG SINH TỬ</span>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px;">
+                            <div class="form-group">
+                                <label><strong>Họ và Tên (*)</strong>:</label>
+                                <input type="text" id="crud-ho-ten" class="form-control" placeholder="Ví dụ: Trần Văn Nam" required style="font-size: 15px; font-weight: bold;">
+                            </div>
+                            <div class="form-group">
+                                <label>Giới tính (*):</label>
+                                <select id="crud-gioi-tinh" class="form-control">
+                                    <option value="Nam">Nam 👨</option>
+                                    <option value="Nữ">Nữ 👩</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tự hiệu / Thứ bậc:</label>
+                                <input type="text" id="crud-ten-hieu" class="form-control" placeholder="Trưởng nam, Thứ nam, Ái nữ...">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 12px; align-items: start;">
+                            <div class="form-group">
+                                <label>Tình trạng sinh tử (*):</label>
+                                <div class="radio-status-wrap">
+                                    <label class="radio-chip">
+                                        <input type="radio" name="crud_status_radio" id="crud-status-alive" value="alive" checked>
+                                        <span class="badge-alive">🟢 Còn sống</span>
+                                    </label>
+                                    <label class="radio-chip">
+                                        <input type="radio" name="crud_status_radio" id="crud-status-deceased" value="deceased">
+                                        <span class="badge-deceased">🕊️ Đã khuất</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Năm sinh / Ngày sinh:</label>
+                                <input type="text" id="crud-ngay-sinh" class="form-control" placeholder="Ví dụ: 1985 hoặc 15/08/1985">
+                            </div>
+
+                            <div class="form-group" id="wrap-crud-ngay-mat">
+                                <label>Ngày mất Âm lịch (Kỵ giỗ):</label>
+                                <input type="text" id="crud-ngay-mat-am" class="form-control" placeholder="Ví dụ: 15/05 hoặc 22/01">
+                                <small style="font-size: 11px; color: var(--gold-dark); display: block; margin-top: 3px;">
+                                    🔔 Tự động đồng bộ vào Lịch Giỗ
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. THẾ THỨ & MỐI QUAN HỆ HUYẾT THỐNG -->
+                    <div class="modal-section-group">
+                        <div class="modal-section-title">
+                            <span>🌿 2. THẾ THỨ & MỐI QUAN HỆ HUYẾT THỐNG</span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px;">
+                            <div class="form-group">
+                                <label><strong>Thân sinh (Cha hoặc Mẹ) (*)</strong>:</label>
+                                <select id="crud-parent-id" class="form-control" style="font-size: 14px; font-weight: 500;"></select>
+                                <small style="font-size: 11.5px; color: var(--text-muted); display: block; margin-top: 3px;">
+                                    Hệ thống sẽ tự động tính thế hệ (Đời con = Đời cha + 1)
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Thế hệ (Đời thứ 1 - 30) (*):</label>
+                                <input type="number" id="crud-doi-thu" class="form-control" min="1" max="50" required style="font-weight: bold;">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; margin-top: 10px;">
+                            <div class="form-group">
+                                <label>Chi nhánh / Cành họ (*):</label>
+                                <input type="text" id="crud-chi-nhanh" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Mã định danh ID (*):</label>
+                                <div style="display: flex; gap: 6px;">
+                                    <input type="text" id="crud-id" class="form-control" required style="font-family: monospace;">
+                                    <button type="button" class="btn-royal-sm" id="btn-auto-gen-id" title="Tạo mã ID tự động">🔄</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. HÔN PHỐI & MỘ PHẦN -->
+                    <div class="modal-section-group">
+                        <div class="modal-section-title">
+                            <span>🏡 3. GIA ĐÌNH & NƠI AN NGHỈ</span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                            <div class="form-group">
+                                <label>Phối ngẫu (Vợ / Chồng):</label>
+                                <input type="text" id="crud-vo-chong" class="form-control" placeholder="Họ tên vợ/chồng, năm sinh, quê quán...">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Mộ phần / Nơi an nghỉ / Nơi cư ngụ:</label>
+                                <input type="text" id="crud-mo-phan" class="form-control" placeholder="Địa chỉ an táng hoặc nơi sinh sống hiện nay...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. TIỂU SỬ & CÔNG ĐỨC (VINH DANH SỔ VÀNG) -->
+                    <div class="modal-section-group">
+                        <div class="modal-section-title">
+                            <span>📜 4. TIỂU SỬ, HỌC VỊ & CÔNG ĐỨC (VINH DANH SỔ VÀNG)</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Học vị / Học hàm / Nghề nghiệp / Chức danh:</label>
+                            <input type="text" id="crud-danh-hieu" class="form-control" placeholder="Ví dụ: Kỹ sư phần mềm, Bác sĩ, Doanh nhân, Cử nhân... (Hiển thị Bảng Vàng)">
+                        </div>
+
+                        <div class="form-group" style="margin-top: 10px;">
+                            <label>Tiểu sử tóm tắt & Hành trạng sự nghiệp:</label>
+                            <textarea id="crud-tieu-su" class="form-control" rows="2" placeholder="Ghi chép công đức, học hành, sự nghiệp..."></textarea>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 10px;">
+                            <label>Đóng góp công đức với dòng họ:</label>
+                            <textarea id="crud-cong-duc" class="form-control" rows="2" placeholder="Đóng góp xây dựng từ đường, quỹ khuyến học, phụng tổ..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Nút bấm hành động -->
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;">
+                        <button type="button" class="btn-royal-outline" onclick="window.closeAllModals()" style="padding: 10px 20px;">
+                            ✖ Hủy Bỏ
+                        </button>
+                        <button type="submit" class="btn-royal" style="padding: 10px 24px; font-size: 15px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-color: #6ee7b7;">
+                            💾 LƯU THÔNG TIN VÀO GIA PHẢ
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 1: THIẾT LẬP BẢO MẬT LẦN ĐẦU ================= -->
+    <div class="modal-overlay" id="modal-first-time-setup">
+        <div class="modal-container" style="max-width: 580px; background: var(--paper-card); border: 2.5px solid var(--gold);">
+            <div class="modal-body">
+                <h3 class="text-gold" style="font-size: 20px; margin-bottom: 6px; text-align: center; font-family: var(--font-royal);">
+                    🛡️ THIẾT LẬP BẢO MẬT TÀI KHOẢN LẦN ĐẦU
+                </h3>
+                <p style="font-size: 13.5px; color: var(--text-muted); text-align: center; margin-bottom: 16px;">
+                    Quý vị đang dùng mã khởi tạo mặc định. Để bảo vệ dữ liệu gia phả tuyệt đối, vui lòng thiết lập 3 lớp bảo mật:
+                </p>
+
+                <form id="form-first-time-setup">
+                    <div class="form-group">
+                        <label><strong>1. Đặt Mật khẩu riêng của quý vị (từ 6 - 16 ký tự chữ và số) (*)</strong>:</label>
+                        <input type="password" id="setup-new-pin" class="form-control" maxlength="16" placeholder="Ví dụ: T051981 hoặc 654321" required style="font-size: 18px; letter-spacing: 4px; text-align: center; font-weight: bold; color: var(--primary-red);">
+                    </div>
+
+                    <div class="form-group" style="margin-top: 12px;">
+                        <label><strong>2. Chọn / Nhập Câu hỏi bí mật cá nhân (*)</strong>:</label>
+                        <input type="text" id="setup-question" class="form-control" placeholder="Ví dụ: Tên trường tiểu học đầu tiên của tôi là gì?" required>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label><strong>Câu trả lời bí mật (được mã hóa một chiều SHA-256) (*)</strong>:</label>
+                        <input type="text" id="setup-answer" class="form-control" placeholder="Nhập câu trả lời (sau này dùng để tự lấy lại PIN khi quên)" required>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 12px;">
+                        <label><strong>3. Mã Khôi Phục Khẩn Cấp (6 ký tự)</strong>:</label>
+                        <div class="recovery-card-box">
+                            <div style="font-size: 12px; opacity: 0.9;">MÃ BẢO MẬT DỰ PHÒNG CỦA QUÝ VỊ</div>
+                            <div class="recovery-code-prominent" id="setup-display-recovery-code">TR8888</div>
+                            <div style="font-size: 11.5px; color: #fde047;">Dùng để tự đặt lại mã PIN khi quên cả mật khẩu lẫn câu hỏi bí mật.</div>
+                        </div>
+                        <button type="button" class="btn-royal-sm w-100" id="btn-download-recovery-card" style="background: #1e3a8a; border-color: #60a5fa;">
+                            💾 Tải Thẻ Mã Khôi Phục Về Máy Tính / Điện Thoại
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button type="submit" class="btn-royal w-100" style="padding: 12px; font-size: 15px; background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
+                            ✅ HOÀN TẤT THIẾT LẬP BẢO MẬT
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 2: QUÊN MÃ PIN & TỰ ĐẶT LẠI (SERVERLESS) ================= -->
+    <div class="modal-overlay" id="modal-admin-reset-pin">
+        <div class="modal-container" style="max-width: 520px; background: var(--paper-card); border: 2.5px solid var(--gold);">
+            <button class="modal-close-btn">&times;</button>
+            <div class="modal-body">
+                <h3 class="text-gold" style="font-size: 20px; margin-bottom: 6px; text-align: center;">
+                    🔑 TỰ ĐẶT LẠI MÃ PIN QUẢN TRỊ
+                </h3>
+                <p style="font-size: 13.5px; color: var(--text-muted); text-align: center; margin-bottom: 14px;">
+                    Quý vị có thể tự khôi phục mã PIN ngay lập tức mà không cần kết nối mạng Internet.
+                </p>
+
+                <!-- Chọn tài khoản -->
+                <div class="form-group">
+                    <label><strong>Chọn vai trò quản trị của bạn:</strong></label>
+                    <select id="admin-reset-account-select" class="form-control" style="font-weight: bold;"></select>
+                </div>
+
+                <!-- Tabs -->
+                <div style="display: flex; gap: 8px; margin: 14px 0;">
+                    <button type="button" class="btn-royal-sm w-100" id="tab-admin-reset-question" style="background: #0284c7;">
+                        ❓ Bằng Câu Hỏi Bí Mật
+                    </button>
+                    <button type="button" class="btn-royal-sm-outline w-100" id="tab-admin-reset-code">
+                        🛡️ Bằng Mã Khôi Phục (6 ký tự)
+                    </button>
+                </div>
+
+                <!-- Form bằng câu hỏi bí mật -->
+                <form id="form-admin-reset-by-question">
+                    <div class="form-group">
+                        <label>Câu hỏi bí mật đã lưu:</label>
+                        <div id="admin-reset-display-question" style="font-size: 13.5px; font-weight: bold; color: var(--gold-dark); padding: 8px; background: rgba(212,175,55,0.15); border-radius: 4px;">
+                            Đang tải câu hỏi...
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label><strong>Câu trả lời của bạn (*)</strong>:</label>
+                        <input type="text" id="admin-reset-input-answer" class="form-control" placeholder="Nhập câu trả lời (không phân biệt dấu hay hoa thường)" required>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label><strong>Mật khẩu mới (từ 6 - 16 ký tự) (*)</strong>:</label>
+                        <input type="password" id="admin-reset-input-new-pin-q" class="form-control" maxlength="16" placeholder="Nhập mật khẩu mới..." required style="font-size: 18px; letter-spacing: 4px; text-align: center;">
+                    </div>
+                    <button type="submit" class="btn-royal w-100" style="margin-top: 16px; padding: 10px;">
+                        ✅ Đặt Lại Mật Khẩu Ngay
+                    </button>
+                </form>
+
+                <!-- Form bằng mã 6 ký tự -->
+                <form id="form-admin-reset-by-code" style="display: none;">
+                    <div class="form-group">
+                        <label><strong>Mã khôi phục 6 ký tự (trên Thẻ Bảo Mật) (*)</strong>:</label>
+                        <input type="text" id="admin-reset-input-code" class="form-control" maxlength="8" placeholder="Ví dụ: TR8888 hoặc LN3333" required style="text-transform: uppercase; font-size: 18px; letter-spacing: 4px; text-align: center; font-weight: bold;">
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label><strong>Mật khẩu mới (từ 6 - 16 ký tự) (*)</strong>:</label>
+                        <input type="password" id="admin-reset-input-new-pin-c" class="form-control" maxlength="16" placeholder="Nhập mật khẩu mới..." required style="font-size: 18px; letter-spacing: 4px; text-align: center;">
+                    </div>
+                    <button type="submit" class="btn-royal w-100" style="margin-top: 16px; padding: 10px;">
+                        ✅ Đặt Lại Mật Khẩu Ngay
+                    </button>
+                </form>
+
+                <div style="margin-top: 14px; text-align: center; font-size: 12.5px; color: var(--text-muted);">
+                    Nếu quên cả 2 phương thức, vui lòng liên hệ <strong>Tổng Quản Trần Văn Thuần</strong> (ĐT/Zalo: <a href="tel:0977181611" style="color: var(--primary-red); font-weight: bold; text-decoration: underline;">0977.181.611</a>) để được cấp lại mã kích hoạt trong Bảng Điều Phối.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 3: CẤP QUYỀN MỚI CHO CON CHÁU / NGƯỜI GHI CHÉP ================= -->
+    <div class="modal-overlay" id="modal-delegate-account">
+        <div class="modal-container" style="max-width: 600px; background: var(--paper-card); border: 2.5px solid var(--gold);">
+            <button class="modal-close-btn">&times;</button>
+            <div class="modal-body">
+                <h3 class="text-gold" style="font-size: 20px; margin-bottom: 6px; font-family: var(--font-royal);">
+                    ➕ CẤP QUYỀN MỚI CHO CON CHÁU / NHÁNH CON
+                </h3>
+                <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 14px;">
+                    Tạo tài khoản quản trị phân quyền cho Trưởng Cành hoặc Người ghi chép phụ trong chi của mình.
+                </p>
+
+                <form id="form-delegate-account">
+                    <div class="form-group">
+                        <label><strong>Họ và Tên người được cấp quyền (*)</strong>:</label>
+                        <input type="text" id="del-holder-name" class="form-control" placeholder="Ví dụ: Trần Văn Nam..." required>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+                        <div class="form-group">
+                            <label>Vai trò ủy quyền (*):</label>
+                            <select id="del-role-select" class="form-control">
+                                <option value="truong_canh">Trưởng Cành / Phân Nhánh</option>
+                                <option value="nguoi_ghi_chep">Người Ghi Chép Phụ (Nhập liệu con cháu)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tên danh xưng vai trò (*):</label>
+                            <input type="text" id="del-role-title" class="form-control" placeholder="Ví dụ: Trưởng Cành Chi Cụ Long..." required>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label>Chi nhánh / Cành phụ trách (*):</label>
+                        <select id="del-scope-branch" class="form-control"></select>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label><strong>Mã PIN khởi tạo ban đầu (6 chữ số) (*)</strong>:</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="del-initial-pin" class="form-control" maxlength="6" placeholder="Ví dụ: 123456" required style="font-weight: bold; letter-spacing: 4px; font-size: 16px;">
+                            <button type="button" class="btn-royal-sm" id="btn-gen-random-pin">🎲 Sinh Ngẫu Nhiên</button>
+                        </div>
+                        <small style="color: var(--text-muted); font-size: 12px; display: block; margin-top: 4px;">
+                            💡 Người được cấp quyền sẽ dùng mã PIN này để đăng nhập lần đầu và tự thiết lập mật khẩu riêng.
+                        </small>
+                    </div>
+
+                    <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                        <button type="button" class="btn-royal-outline" onclick="window.closeAllModals()">✖ Hủy Bỏ</button>
+                        <button type="submit" class="btn-royal" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
+                            ✅ XÁC NHẬN CẤP QUYỀN
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 4: CẤP LẠI MÃ KÍCH HOẠT TẠM THỜI (KHI QUÊN HẾT) ================= -->
+    <div class="modal-overlay" id="modal-reissue-code">
+        <div class="modal-container" style="max-width: 520px; background: var(--paper-card); border: 2.5px solid var(--gold);">
+            <button class="modal-close-btn">&times;</button>
+            <div class="modal-body">
+                <h3 class="text-gold" style="font-size: 20px; margin-bottom: 6px; font-family: var(--font-royal);">
+                    🔄 CẤP LẠI MÃ KÍCH HOẠT KHẨN CẤP
+                </h3>
+                <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 14px;">
+                    Dành cho cấp trên cấp lại mã PIN tạm thời khi người giữ quyền quên cả PIN lẫn Câu hỏi bí mật.
+                </p>
+
+                <form id="form-reissue-code">
+                    <input type="hidden" id="reissue-target-id">
+                    <div class="form-group">
+                        <label>Tài khoản được cấp lại:</label>
+                        <input type="text" id="reissue-target-name" class="form-control" readonly style="font-weight: bold; background: rgba(0,0,0,0.1);">
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label><strong>Mã PIN tạm thời mới (6 số) (*)</strong>:</label>
+                        <input type="text" id="reissue-temp-pin" class="form-control" maxlength="6" value="999999" required style="font-weight: bold; letter-spacing: 4px; font-size: 18px; text-align: center; color: var(--primary-red);">
+                    </div>
+
+                    <div style="margin-top: 18px; display: flex; justify-content: flex-end; gap: 10px;">
+                        <button type="button" class="btn-royal-outline" onclick="window.closeAllModals()">✖ Hủy Bỏ</button>
+                        <button type="submit" class="btn-royal" style="background: #2563eb; border-color: #60a5fa;">
+                            ✅ Cấp Lại Mã Tạm Thời
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="admin-toast" class="admin-toast">
+        <span id="toast-icon">✅</span>
+        <span id="toast-message">Đã lưu thông tin thành công!</span>
+    </div>
+
+    <!-- ================= DẢI CHÂN TRANG FOOTER HOÀNG GIA ================= -->
+    <footer class="app-royal-footer">
+        <div class="footer-inner">
+            <div class="footer-seal-mini" title="Ấn Tín Họ Trần">陳</div>
+            <div class="footer-text-content">
+                <p class="footer-main-text">
+                    TRUNG TÂM QUẢN TRỊ GIA PHẢ HỌ TRẦN VIỆT NAM — CHI HỌ TRẦN LÃNG NAM
+                </p>
+                <p class="footer-copyright">
+                    Phả hệ số hóa &amp; bảo tồn bởi <strong>Trần Văn Thuần</strong> (Đời 23 — Chi Lãng Nam, Trực Cường, Nam Định) • Lưu truyền vạn thế
+                </p>
+                <div class="footer-tags">
+                    <span>❖ Hào Khí Đông A</span>
+                    <span>❖ Đạo Hiếu Làm Đầu</span>
+                    <span>❖ Vạn Đại Thịnh Long</span>
+                    <span>❖ Bính Ngọ 2026</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================= MODAL HỖ TRỢ QUÊN MẬT KHẨU (THÂN THIỆN CHO NGƯỜI CAO TUỔI) ================= -->
+    <div class="modal-overlay" id="modal-forgot-support">
+        <div class="modal-container" style="max-width: 500px; text-align: center; padding: 26px; background: var(--paper-card); border: 2.5px solid var(--gold); border-radius: 8px;">
+            <button class="modal-close-btn">&times;</button>
+            <div style="font-size: 38px; margin-bottom: 6px;">🔐</div>
+            <h3 class="text-gold" style="font-family: var(--font-royal); font-size: 21px; margin-bottom: 14px;">
+                HỖ TRỢ CẤP LẠI MẬT KHẨU
+            </h3>
+            <div style="font-size: 14.5px; line-height: 1.85; color: var(--text-dark); text-align: justify; margin-bottom: 22px; background: rgba(212, 175, 55, 0.12); padding: 14px 18px; border-radius: 6px; border: 1px dashed var(--gold);">
+                Để đảm bảo an toàn dữ liệu gia phả, khi quên mật khẩu vui lòng liên hệ trực tiếp <strong>Tổng Quản Trần Văn Thuần (ĐT/Zalo: 0977.181.611)</strong> hoặc Trưởng Chi/Nhánh đã cấp quyền cho quý vị để được cấp lại mật khẩu mới ngay lập tức.
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <a href="tel:0977181611" class="btn-royal" style="padding: 10px 20px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 14.5px;">
+                    📞 Bấm Gọi: 0977.181.611
+                </a>
+                <a href="https://zalo.me/0977181611" target="_blank" rel="noopener noreferrer" class="btn-royal-outline" style="padding: 10px 18px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 14.5px; border-color: #0284c7; color: #0284c7;">
+                    💬 Nhắn Tin Zalo Nhanh
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL ĐỔI MẬT KHẨU CỦA TÔI (ĐƠN GIẢN) ================= -->
+    <div class="modal-overlay" id="modal-change-my-password">
+        <div class="modal-container" style="max-width: 480px; padding: 26px; background: var(--paper-card); border: 2.5px solid var(--gold); border-radius: 8px;">
+            <button class="modal-close-btn">&times;</button>
+            <div class="text-center" style="margin-bottom: 16px;">
+                <div style="font-size: 32px;">🔑</div>
+                <h3 class="text-gold" style="font-family: var(--font-royal); margin: 6px 0; font-size: 21px;">
+                    ĐỔI MẬT KHẨU CỦA TÔI
+                </h3>
+                <div id="change-pwd-user-info" style="font-size: 13px; color: var(--text-muted); font-style: italic;">
+                    Tài khoản đang đăng nhập
+                </div>
+            </div>
+
+            <form id="form-change-my-password">
+                <div class="form-group">
+                    <label><strong>1. Mật khẩu hiện tại (*)</strong>:</label>
+                    <input type="password" id="input-cur-pwd" class="form-control" maxlength="16" placeholder="Nhập mật khẩu đang dùng" required style="font-size: 16px; letter-spacing: 2px;">
+                </div>
+
+                <div class="form-group" style="margin-top: 12px;">
+                    <label><strong>2. Mật khẩu mới muốn đổi (từ 6 - 16 ký tự) (*)</strong>:</label>
+                    <input type="password" id="input-new-pwd" class="form-control" maxlength="16" placeholder="Nhập mật khẩu mới muốn đặt" required style="font-size: 16px; letter-spacing: 2px;">
+                </div>
+
+                <div class="form-group" style="margin-top: 12px;">
+                    <label><strong>3. Xác nhận lại mật khẩu mới (*)</strong>:</label>
+                    <input type="password" id="input-confirm-new-pwd" class="form-control" maxlength="16" placeholder="Nhập lại mật khẩu mới một lần nữa" required style="font-size: 16px; letter-spacing: 2px;">
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn-royal-outline w-100" onclick="window.closeAllModals()">
+                        ✖ Đóng
+                    </button>
+                    <button type="submit" class="btn-royal w-100" style="padding: 11px; font-size: 14.5px;">
+                        💾 Lưu Mật Khẩu Mới
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= THƯ VIỆN & SCRIPT ================= -->
+    <script src="libs/d3.min.js"></script>
+    <script src="libs/xlsx.full.min.js"></script>
+
+    <!-- Dữ liệu phả hệ -->
+    <script src="data/data_truc_chinh.js"></script>
+    <script src="data/data_chi_1.js"></script>
+    <script src="data/data_chi_2.js"></script>
+    <script src="data/data_chi_lang_nam.js"></script>
+    <script src="data/data_manager.js"></script>
+
+    <!-- Hệ thống lưu trữ và đồng bộ -->
+    <script src="js/idb-storage.js"></script>
+    <script src="js/auth_manager.js"></script>
+    <script src="js/sync.js"></script>
+    <script src="js/admin.js"></script>
+
+    <script>
+        window.closeAllModals = function() {
+            document.querySelectorAll(".modal-overlay").forEach(m => m.style.display = "none");
+        };
+        document.querySelectorAll(".modal-close-btn").forEach(btn => {
+            btn.addEventListener("click", window.closeAllModals);
+        });
+
+        // Hàm hiển thị Toast
+        window.showAdminToast = function(msg, isSuccess = true) {
+            const toast = document.getElementById("admin-toast");
+            const msgEl = document.getElementById("toast-message");
+            const iconEl = document.getElementById("toast-icon");
+            if (!toast) return;
+
+            msgEl.innerText = msg;
+            iconEl.innerText = isSuccess ? "✅" : "⚠️";
+            toast.style.background = isSuccess ? "#065f46" : "#7f1d1d";
+            toast.style.borderColor = isSuccess ? "#34d399" : "#f87171";
+            toast.style.display = "flex";
+
+            clearTimeout(window._toastTimeout);
+            window._toastTimeout = setTimeout(() => {
+                toast.style.display = "none";
+            }, 3500);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIA PHẢ HỌ TRẦN VIỆT NAM — Tinh Hoa Truyền Thừa & Kết Nối Các Chi Phái</title>
+    
+    <!-- PWA Web App Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#5b0606">
+    <meta name="description" content="GIA PHẢ HỌ TRẦN VIỆT NAM — Ứng dụng gia phả số đa nhánh hoạt động 100% ngoại tuyến, kết nối các chi họ Trần toàn quốc.">
+
+    <!-- CSS Modules -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+    <!-- ================= HEADER SƠN SON THIẾP VÀNG ================= -->
+    <header class="app-header">
+        <div class="header-top">
+            <div class="brand-section">
+                <div class="brand-seal" title="Ấn Tín Họ Trần">
+                    <span>陳</span>
+                </div>
+                <div class="brand-text">
+                    <h1>GIA PHẢ HỌ TRẦN VIỆT NAM</h1>
+                    <div class="brand-sub">Tinh Hoa Truyền Thừa & Kết Nối Các Chi Phái Toàn Quốc • Hào Khí Đông A</div>
+                </div>
+            </div>
+
+            <!-- HUY HIỆU TÁC GIẢ GÓC TRÊN BÊN PHẢI (CÂN ĐỐI VỚI ẤN TRÒN CHỮ TRẦN) -->
+            <div class="header-author-badge" title="Tác giả khởi xướng &amp; số hóa gia phả">
+                <div class="author-seal-square">
+                    <span class="seal-char-han">純</span>
+                    <span class="seal-sub">THUẦN</span>
+                </div>
+                <div class="author-badge-text">
+                    <div class="author-title">Khởi xướng &amp; Số hóa: <strong class="author-name">Trần Văn Thuần</strong></div>
+                    <div class="author-sub">Hậu duệ Đời 23 • Chi Họ Trần Lãng Nam</div>
+                    <div class="author-phone">
+                        <a href="tel:0977181611" class="author-phone-link" title="Bấm để gọi điện hoặc kết nối Zalo Trần Văn Thuần">📞 ĐT/Zalo: <strong>0977.181.611</strong></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- THANH TIỆN ÍCH THÔNG MINH -->
+            <div class="utility-toolbar">
+                <!-- Tăng cỡ chữ người cao tuổi -->
+                <button class="util-btn" id="btn-font-plus" title="Tăng kích thước chữ cho người lớn tuổi">
+                    <span id="font-size-indicator" style="font-weight: bold; font-size: 14px;">A+</span> Phóng to
+                </button>
+                <button class="util-btn" id="btn-font-reset" title="Khôi phục cỡ chữ chuẩn">
+                    A Chuẩn
+                </button>
+
+                <!-- Chế độ Ánh nến ban đêm -->
+                <button class="util-btn" id="btn-dark-mode" title="Chuyển chế độ đọc ban đêm / ánh nến">
+                    🕯️ Ánh Nến / Đêm
+                </button>
+
+                <!-- Thắp hương & Lưu bút online -->
+                <button class="util-btn util-btn-incense" id="btn-open-incense" title="Không gian tâm linh bàn thờ tổ">
+                    🪔 Thắp Hương & Lưu Bút
+                </button>
+
+                <!-- Trình chiếu toàn màn hình -->
+                <button class="util-btn" id="btn-fullscreen" title="Trình chiếu toàn màn hình tivi / máy chiếu">
+                    ⛶ Toàn Màn Hình
+                </button>
+
+                <!-- Công tắc bảo mật người còn sống -->
+                <label class="privacy-toggle" title="Tự động ẩn ngày tháng sinh của thế hệ còn sống để bảo vệ quyền riêng tư">
+                    <input type="checkbox" id="chk-privacy-mode" checked>
+                    <span>🔒 Ẩn tin người còn sống</span>
+                </label>
+
+                <!-- Bộ lọc Chi nhánh toàn cục -->
+                <select id="global-branch-select" class="util-btn" style="background: rgba(0,0,0,0.5); cursor: pointer;" title="Lọc nhanh phả hệ theo từng Chi/Nhánh">
+                    <option value="Tất cả">🌿 Toàn Cảnh Đại Tộc Họ Trần</option>
+                    <option value="Chi Lãng Nam">🌾 Chi Họ Trần Lãng Nam (Đời 1 - 24)</option>
+                    <option value="Chi Cụ Chí Hòa">🏡 Phân Nhánh Cụ Chí Hòa (Đời 20 - 24)</option>
+                    <option value="Chi Cụ Chí Hòa - Nhánh ông Long">🔹 Nhánh ông Long (Đời 21 - 23)</option>
+                    <option value="Chi Cụ Chí Hòa - Nhánh ông Thịnh">🔹 Nhánh ông Thịnh (Đời 21 - 23)</option>
+                    <option value="Chi Cụ Chí Hòa - Nhánh ông Vượng">🔹 Nhánh ông Vượng (Đời 21 - 24)</option>
+                    <option value="Trục chính">🏛️ Trục Chính Sử Triều Trần</option>
+                    <option value="Chi 1">⚔️ Chi 1 (An Sinh Vương & Hưng Đạo Vương)</option>
+                    <option value="Chi 2">📜 Chi 2 (Chiêu Minh Vương & Chiêu Văn Vương)</option>
+                </select>
+
+                <!-- Trạng thái mạng -->
+                <span id="network-status-badge" class="network-badge online">🟢 Trực tuyến</span>
+
+                <!-- Nút sang trang Quản trị -->
+                <a href="admin.html" class="util-btn" style="background: #a17f1a; border-color: #ffd700;" title="Trang quản trị cập nhật Excel và phân quyền từng chi">
+                    ⚙️ Quản Trị Chi
+                </a>
+            </div>
+        </div>
+
+        <!-- THANH 5 TAB ĐIỀU HƯỚNG HIỂN THỊ CHÍNH -->
+        <nav class="main-nav-bar">
+            <button class="main-nav-item" id="nav-btn-book" onclick="window.switchTab('book')">
+                <span>📖</span> Tab 1: Sách Gia Phả
+            </button>
+            <button class="main-nav-item active" id="nav-btn-tree" onclick="window.switchTab('tree')">
+                <span>🌲</span> Tab 2: Phả Đồ Cổ Điển
+            </button>
+            <button class="main-nav-item" id="nav-btn-family" onclick="window.switchTab('family')">
+                <span>👨‍👩‍👧‍👦</span> Tab 3: Cây Gia Đình Vợ - Chồng
+            </button>
+            <button class="main-nav-item" id="nav-btn-galaxy" onclick="window.switchTab('galaxy')">
+                <span>🌌</span> Tab 4: Tinh Tú Ngân Hà
+            </button>
+            <button class="main-nav-item" id="nav-btn-golden" onclick="window.switchTab('golden')">
+                <span>🏆</span> Tab 5: Sổ Vàng & Lịch Giỗ
+            </button>
+        </nav>
+    </header>
+
+    <!-- ================= KHU VỰC HIỂN THỊ 5 TAB ================= -->
+    <main class="main-content-area">
+        
+        <!-- TAB 1: SÁCH GIA PHẢ CỔ TRUYỀN -->
+        <div class="tab-pane" id="pane-book">
+            <div id="book-container"></div>
+        </div>
+
+        <!-- TAB 2: PHẢ ĐỒ CỔ ĐIỂN (D3.JS TREE) -->
+        <div class="tab-pane active" id="pane-tree">
+            <div class="tree-wrapper">
+                <div class="tree-control-bar">
+                    <div class="tree-control-group">
+                        <button class="btn-royal-sm" onclick="window.classicTree.setOrientation('horizontal')">↔️ Cây Dạng Ngang</button>
+                        <button class="btn-royal-sm" onclick="window.classicTree.setOrientation('vertical')">↕️ Cây Dạng Dọc</button>
+                    </div>
+                    <div class="tree-control-group">
+                        <button class="btn-royal-sm-outline" onclick="window.classicTree.zoomIn()" title="Phóng to">🔍 +</button>
+                        <button class="btn-royal-sm-outline" onclick="window.classicTree.zoomOut()" title="Thu nhỏ">🔍 −</button>
+                        <button class="btn-royal-sm-outline" onclick="window.classicTree.resetZoom()" title="Căn giữa màn hình">🎯 Căn Giữa</button>
+                        <button class="btn-royal-sm" onclick="window.classicTree.exportHighResImage()" title="Tải ảnh PNG độ nét cao để in ấn">🖼️ Xuất Ảnh In Ấn</button>
+                    </div>
+                </div>
+                <div id="tree-container" class="tree-viewport-area"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: CÂY GIA ĐÌNH VỢ - CHỒNG (SONG SONG) -->
+        <div class="tab-pane" id="pane-family">
+            <div class="family-view-layout">
+                <div id="family-chart-container"></div>
+                <div id="family-detail-panel" class="family-detail-wrapper"></div>
+            </div>
+        </div>
+
+        <!-- TAB 4: TINH TÚ NGÂN HÀ -->
+        <div class="tab-pane" id="pane-galaxy">
+            <div class="galaxy-wrapper">
+                <div class="galaxy-control-bar">
+                    <button class="btn-royal-sm" onclick="window.galaxyOrbit.setMode('orbit')">🪐 Quỹ Đạo Đồng Tâm</button>
+                    <button class="btn-royal-sm" onclick="window.galaxyOrbit.setMode('force')">⚡ Mạng Lưới Trọng Lực Kéo Thả</button>
+                </div>
+                <div id="galaxy-container" style="width: 100%; height: 100%;"></div>
+            </div>
+        </div>
+
+        <!-- TAB 5: SỔ VÀNG, TRA CỨU & LỊCH GIỖ THÔNG MINH -->
+        <div class="tab-pane" id="pane-golden">
+            <div id="golden-container"></div>
+        </div>
+
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="app-footer">
+        <p>✦ <strong>GIA PHẢ ĐẠI TỘC HỌ TRẦN VIỆT NAM</strong> • Tinh Hoa Truyền Thừa & Kết Nối Các Chi Phái ✦</p>
+        <p style="font-size: 12px; margin-top: 4px; color: #baa599;">Kế thừa di sản Hào Khí Đông A • Tự động tính Âm Dương Lịch Hồ Ngọc Đức • Lưu trữ vĩnh viễn trên trình duyệt thiết bị</p>
+    </footer>
+
+    <!-- ================= MODAL XEM CHI TIẾT BIA KÝ ================= -->
+    <div class="modal-overlay" id="member-detail-modal">
+        <div class="modal-container">
+            <button class="modal-close-btn">&times;</button>
+            <div class="modal-body" id="modal-detail-body"></div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL BÀN THỜ TÂM LINH & LƯU BÚT ================= -->
+    <div class="modal-overlay" id="incense-modal">
+        <div class="modal-container incense-modal-container">
+            <button class="modal-close-btn">&times;</button>
+            <div class="modal-body">
+                <!-- KHÔNG GIAN BÀN THỜ TỔ TIÊN -->
+                <div class="incense-altar-scene">
+                    <div class="altar-table-top">LƯU ĐỨC TRƯỜNG TỒN • VẠN THẾ ANH LINH</div>
+                    <div class="altar-table-sub">Trước linh đài trang nghiêm, con cháu dâng nén tâm hương tưởng nhớ Tiên Tổ</div>
+                    
+                    <div class="altar-items-row">
+                        <div class="candle-left" title="Đèn cầy đỏ quang minh">🕯️</div>
+                        <div class="incense-burner-visual">
+                            <div class="smoke-stream">
+                                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M50 80 Q40 50 60 30 T50 0" stroke="rgba(255,255,255,0.7)" stroke-width="4" fill="none"/>
+                                    <path d="M45 80 Q35 55 55 35 T45 5" stroke="rgba(255,255,255,0.5)" stroke-width="3" fill="none"/>
+                                </svg>
+                            </div>
+                            <div class="incense-sticks">
+                                <div class="stick"></div>
+                                <div class="stick" style="height: 40px;"></div>
+                                <div class="stick"></div>
+                            </div>
+                            <div class="burner-pot" title="Lư hương đồng bát bửu">🏺</div>
+                        </div>
+                        <div class="candle-right" title="Đèn cầy đỏ quang minh">🕯️</div>
+                    </div>
+
+                    <button class="btn-royal" id="btn-sound-bell">🔔 Gõ Chuông Gia Trì</button>
+                </div>
+
+                <!-- FORM DÂNG HƯƠNG & DANH SÁCH LƯU BÚT -->
+                <div class="incense-form-grid">
+                    <!-- Form -->
+                    <div class="incense-form-block">
+                        <h4>✍️ KÍNH DÂNG NÉN HƯƠNG & GHI LƯU BÚT</h4>
+                        <form id="form-light-incense">
+                            <div class="form-group">
+                                <label>Họ và tên con cháu:</label>
+                                <input type="text" id="incense-sender-name" class="form-control" placeholder="Ví dụ: Trần Văn Thuần..." required>
+                            </div>
+                            <div class="form-group">
+                                <label>Thuộc Chi / Nhánh / Nơi cư ngụ:</label>
+                                <input type="text" id="incense-sender-branch" class="form-control" placeholder="Ví dụ: Chi Lãng Nam - Ninh Bình / Hà Nội" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Lời triên & Nguyện ước dòng họ:</label>
+                                <textarea id="incense-prayer-text" class="form-control" placeholder="Kính cẩn bái tạ công đức tổ tiên, nguyện cầu gia tộc hưng thịnh..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn-royal w-100" style="margin-top: 8px;">🪔 Thành Kính Thắp Hương & Lưu Bút</button>
+                        </form>
+                    </div>
+
+                    <!-- Danh sách lưu bút -->
+                    <div class="incense-form-block">
+                        <h4>📜 LƯU BÚT HỌ TỘC TỪ MUÔN PHƯƠNG</h4>
+                        <div id="incense-guestbook-list" class="guestbook-list-container">
+                            <!-- Nạp động bằng JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= DẢI CHÂN TRANG FOOTER HOÀNG GIA ================= -->
+    <footer class="app-royal-footer">
+        <div class="footer-inner">
+            <div class="footer-seal-mini" title="Ấn Tín Họ Trần">陳</div>
+            <div class="footer-text-content">
+                <p class="footer-main-text">
+                    GIA PHẢ ĐẠI TỘC HỌ TRẦN VIỆT NAM — CHI HỌ TRẦN LÃNG NAM
+                </p>
+                <p class="footer-copyright">
+                    Phả hệ số hóa &amp; bảo tồn bởi <strong>Trần Văn Thuần</strong> (Đời 23 — Chi Lãng Nam, Trực Cường, Nam Định) • Lưu truyền vạn thế
+                </p>
+                <div class="footer-tags">
+                    <span>❖ Hào Khí Đông A</span>
+                    <span>❖ Đạo Hiếu Làm Đầu</span>
+                    <span>❖ Vạn Đại Thịnh Long</span>
+                    <span>❖ Bính Ngọ 2026</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chân trang dành riêng cho bản in A4 -->
+    <div class="print-only-footer">
+        Phả hệ số hóa &amp; bảo tồn bởi Trần Văn Thuần (Đời 23 — Chi Lãng Nam, Trực Cường, Nam Định) • Lưu truyền vạn thế
+    </div>
+
+    <!-- ================= MODAL XÁC THỰC MÃ PIN NHANH (SỬA TẠI CHỖ) ================= -->
+    <div class="modal-overlay" id="modal-quick-auth">
+        <div class="modal-container quick-auth-box">
+            <button class="modal-close-btn">&times;</button>
+            <div class="modal-body">
+                <h3 class="text-gold" style="font-size: 20px; margin-bottom: 6px;">🔐 XÁC THỰC QUYỀN CHỈNH SỬA</h3>
+                <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px;">
+                    Nhập mã PIN của Đại Tộc, Trưởng Chi hoặc Trưởng Cành để sửa thành viên này.
+                </p>
+
+                <form id="form-quick-auth">
+                    <input type="password" id="input-quick-auth-pin" class="quick-pin-display" maxlength="16" placeholder="Nhập mật khẩu..." required autofocus>
+                    <div style="display: flex; gap: 8px; margin-top: 6px;">
+                        <button type="submit" class="btn-royal w-100" style="padding: 10px; font-size: 15px;">
+                            Xác Thực Ngay
+                        </button>
+                    </div>
+                </form>
+
+                <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                    <a href="javascript:void(0)" id="link-open-forgot-pin" style="color: var(--primary-red); text-decoration: underline; font-weight: bold;">
+                        ❓ Quên mật khẩu? Tự đặt lại ngay
+                    </a>
+                    <span id="quick-auth-status-tag" style="font-size: 12px; color: #16a34a; font-weight: bold;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL CHỈNH SỬA TẠI CHỖ (PHÂN QUYỀN) ================= -->
+    <div class="modal-overlay" id="modal-quick-edit">
+        <div class="modal-container quick-edit-container">
+            <button class="modal-close-btn">&times;</button>
+            <div class="modal-body">
+                <div class="quick-edit-header-bar">
+                    <div>
+                        <h3 class="text-gold" style="margin: 0; font-size: 20px; font-family: var(--font-royal);">
+                            ✏️ CẬP NHẬT THÀNH VIÊN TẠI CHỖ
+                        </h3>
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+                            Người thực hiện: <strong id="quick-edit-user-role" class="text-gold">Admin</strong>
+                        </div>
+                    </div>
+                    <div id="quick-edit-branch-tag" class="quick-edit-target-badge">
+                        Nhánh phụ trách
+                    </div>
+                </div>
+
+                <form id="form-quick-edit">
+                    <input type="hidden" id="quick-edit-id">
+                    <input type="hidden" id="quick-edit-parent-id">
+
+                    <!-- PHẦN 1: THÔNG TIN NHÂN THÂN -->
+                    <div class="quick-edit-form-section">
+                        <div class="quick-edit-form-title">
+                            <span>👤 1. HỌ TÊN, THẾ THỨ & TÌNH TRẠNG SINH TỬ</span>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px;">
+                            <div class="form-group">
+                                <label><strong>Họ và Tên (*)</strong>:</label>
+                                <input type="text" id="qe-ho-ten" class="form-control" required style="font-weight: bold; font-size: 15px;">
+                            </div>
+                            <div class="form-group">
+                                <label>Giới tính (*):</label>
+                                <select id="qe-gioi-tinh" class="form-control">
+                                    <option value="Nam">Nam 👨</option>
+                                    <option value="Nữ">Nữ 👩</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Thế hệ (Đời thứ):</label>
+                                <input type="number" id="qe-doi-thu" class="form-control" min="1" max="50" required>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 12px; margin-top: 10px; align-items: start;">
+                            <div class="form-group">
+                                <label>Tình trạng sinh tử (*):</label>
+                                <div style="display: flex; gap: 12px; margin-top: 4px;">
+                                    <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer;">
+                                        <input type="radio" name="qe_status_radio" id="qe-status-alive" value="alive">
+                                        <span style="color: #16a34a; font-weight: bold;">🟢 Còn sống</span>
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer;">
+                                        <input type="radio" name="qe_status_radio" id="qe-status-deceased" value="deceased">
+                                        <span style="color: #dc2626; font-weight: bold;">🕊️ Đã khuất</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Năm sinh / Ngày sinh:</label>
+                                <input type="text" id="qe-ngay-sinh" class="form-control" placeholder="1980 hoặc 15/08/1980">
+                            </div>
+                            <div class="form-group" id="wrap-qe-ngay-mat">
+                                <label>Ngày kỵ giỗ (Âm lịch):</label>
+                                <input type="text" id="qe-ngay-mat-am" class="form-control" placeholder="Ví dụ: 18/01">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PHẦN 2: CHI PHÁI & GIA ĐÌNH -->
+                    <div class="quick-edit-form-section">
+                        <div class="quick-edit-form-title">
+                            <span>🌿 2. CHI PHÁI, HÔN PHỐI & MỘ PHẦN</span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1.5fr 1.5fr; gap: 12px;">
+                            <div class="form-group">
+                                <label>Chi nhánh / Cành (*):</label>
+                                <input type="text" id="qe-chi-nhanh" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tự hiệu / Thứ bậc:</label>
+                                <input type="text" id="qe-ten-hieu" class="form-control" placeholder="Trưởng nam, Thứ nam, Ông...">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+                            <div class="form-group">
+                                <label>Phối ngẫu (Vợ / Chồng):</label>
+                                <input type="text" id="qe-vo-chong" class="form-control" placeholder="Họ tên vợ/chồng, năm sinh...">
+                            </div>
+                            <div class="form-group">
+                                <label>Nơi an nghỉ / Mộ phần / Cư ngụ:</label>
+                                <input type="text" id="qe-mo-phan" class="form-control" placeholder="Nơi an táng hoặc nơi ở hiện nay...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PHẦN 3: TIỂU SỬ & CÔNG ĐỨC -->
+                    <div class="quick-edit-form-section">
+                        <div class="quick-edit-form-title">
+                            <span>📜 3. HỌC VỊ, TIỂU SỬ & CÔNG ĐỨC (SỔ VÀNG)</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Học vị / Học hàm / Chức danh / Nghề nghiệp:</label>
+                            <input type="text" id="qe-danh-hieu" class="form-control" placeholder="Ví dụ: Kỹ sư, Cử nhân, Doanh nhân... (Vinh danh Sổ Vàng)">
+                        </div>
+
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Tiểu sử tóm tắt & Hành trạng:</label>
+                            <textarea id="qe-tieu-su" class="form-control" rows="2" placeholder="Ghi chép công đức, học vấn, sự nghiệp..."></textarea>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Công đức với dòng họ & Quê hương:</label>
+                            <textarea id="qe-cong-duc" class="form-control" rows="2" placeholder="Đóng góp xây dựng từ đường, quỹ khuyến học..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- HÀNG NÚT BẤM TIỆN ÍCH -->
+                    <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; margin-top: 16px; flex-wrap: wrap;">
+                        <button type="button" class="btn-royal-sm" id="btn-qe-add-child" style="background: #0284c7; border-color: #38bdf8;">
+                            ➕ Thêm Con Cho Vị Này
+                        </button>
+
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="btn-royal-outline" onclick="window.closeAllModals()">
+                                ✖ Hủy Bỏ
+                            </button>
+                            <button type="submit" class="btn-royal" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-color: #6ee7b7; padding: 10px 22px;">
+                                💾 LƯU THAY ĐỔI VÀO PHẢ HỆ
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- KHU VỰC XUẤT GÓI ĐỒNG BỘ ZALO SAU KHI SỬA -->
+                <div id="quick-edit-zalo-panel" style="display: none; margin-top: 18px; padding: 12px; background: rgba(5, 150, 105, 0.1); border: 1.5px solid #10b981; border-radius: 6px; text-align: center;">
+                    <span style="color: #065f46; font-weight: bold; font-size: 14px;">✅ Đã lưu thay đổi vào cơ sở dữ liệu thiết bị!</span>
+                    <div style="margin-top: 8px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                        <button type="button" class="btn-royal-sm" id="btn-export-zalo-quick" style="background: #2563eb; border-color: #60a5fa;">
+                            📥 Tải Gói Dữ Liệu Mới Gửi Zalo Cho Tổng Quản
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL HỖ TRỢ QUÊN MẬT KHẨU (THÂN THIỆN CHO NGƯỜI CAO TUỔI) ================= -->
+    <div class="modal-overlay" id="modal-forgot-support">
+        <div class="modal-container" style="max-width: 500px; text-align: center; padding: 26px; background: var(--paper-card); border: 2.5px solid var(--gold); border-radius: 8px;">
+            <button class="modal-close-btn">&times;</button>
+            <div style="font-size: 38px; margin-bottom: 6px;">🔐</div>
+            <h3 class="text-gold" style="font-family: var(--font-royal); font-size: 21px; margin-bottom: 14px;">
+                HỖ TRỢ CẤP LẠI MẬT KHẨU
+            </h3>
+            <div style="font-size: 14.5px; line-height: 1.85; color: var(--text-dark); text-align: justify; margin-bottom: 22px; background: rgba(212, 175, 55, 0.12); padding: 14px 18px; border-radius: 6px; border: 1px dashed var(--gold);">
+                Để đảm bảo an toàn dữ liệu gia phả, khi quên mật khẩu vui lòng liên hệ trực tiếp <strong>Tổng Quản Trần Văn Thuần (ĐT/Zalo: 0977.181.611)</strong> hoặc Trưởng Chi/Nhánh đã cấp quyền cho quý vị để được cấp lại mật khẩu mới ngay lập tức.
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <a href="tel:0977181611" class="btn-royal" style="padding: 10px 20px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 14.5px;">
+                    📞 Bấm Gọi: 0977.181.611
+                </a>
+                <a href="https://zalo.me/0977181611" target="_blank" rel="noopener noreferrer" class="btn-royal-outline" style="padding: 10px 18px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 14.5px; border-color: #0284c7; color: #0284c7;">
+                    💬 Nhắn Tin Zalo Nhanh
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL QUÊN MÃ PIN & TỰ ĐẶT LẠI (SERVERLESS) ================= -->
+    <div class="modal-overlay" id="modal-quick-reset-pin">
+        <div class="modal-container" style="max-width: 520px; background: var(--paper-card); border: 2.5px solid var(--gold);">
+            <button class="modal-close-btn">&times;</button>
+            <div class="modal-body">
+                <h3 class="text-gold" style="font-size: 20px; margin-bottom: 6px; text-align: center;">
+                    🔑 TỰ ĐẶT LẠI MÃ PIN AN TOÀN
+                </h3>
+                <p style="font-size: 13.5px; color: var(--text-muted); text-align: center; margin-bottom: 14px;">
+                    Sử dụng Câu hỏi bí mật hoặc Mã khôi phục 6 ký tự để tự đặt lại PIN mới.
+                </p>
+
+                <!-- Bước 1: Chọn tài khoản -->
+                <div class="form-group">
+                    <label><strong>Chọn vai trò quản trị của bạn:</strong></label>
+                    <select id="reset-account-select" class="form-control" style="font-weight: bold;">
+                        <option value="tong_quan">👑 Tổng Quản Đại Tộc (Trần Văn Thuần)</option>
+                        <option value="truong_chi_langnam">🌾 Trưởng Chi Họ Trần Lãng Nam</option>
+                        <option value="canh_long">🔹 Trưởng Cành Cụ Long</option>
+                        <option value="canh_thinh">🔹 Trưởng Cành Cụ Thịnh</option>
+                        <option value="canh_vuong">🔹 Trưởng Cành Cụ Vượng</option>
+                    </select>
+                </div>
+
+                <!-- Phương thức khôi phục: Tabs -->
+                <div style="display: flex; gap: 8px; margin: 14px 0;">
+                    <button type="button" class="btn-royal-sm w-100" id="tab-btn-reset-question" style="background: #0284c7;">
+                        ❓ Bằng Câu Hỏi Bí Mật
+                    </button>
+                    <button type="button" class="btn-royal-sm-outline w-100" id="tab-btn-reset-code">
+                        🛡️ Bằng Mã Khôi Phục (6 ký tự)
+                    </button>
+                </div>
+
+                <!-- Khung 1: Khôi phục bằng Câu hỏi bí mật -->
+                <form id="form-reset-by-question">
+                    <div class="form-group">
+                        <label>Câu hỏi bí mật đã cài đặt:</label>
+                        <div id="reset-display-question" style="font-size: 13.5px; font-weight: bold; color: var(--gold-dark); padding: 8px; background: rgba(212,175,55,0.15); border-radius: 4px;">
+                            Đang tải câu hỏi...
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label><strong>Câu trả lời của bạn (*)</strong>:</label>
+                        <input type="text" id="reset-input-answer" class="form-control" placeholder="Nhập câu trả lời (không phân biệt dấu hay hoa thường)" required>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label><strong>Mật khẩu mới muốn đặt (từ 6 - 16 ký tự) (*)</strong>:</label>
+                        <input type="password" id="reset-input-new-pin-q" class="form-control" maxlength="16" placeholder="Nhập mật khẩu mới..." required style="font-size: 18px; letter-spacing: 4px; text-align: center;">
+                    </div>
+                    <button type="submit" class="btn-royal w-100" style="margin-top: 16px; padding: 10px;">
+                        ✅ Đặt Lại Mật Khẩu Ngay
+                    </button>
+                </form>
+
+                <!-- Khung 2: Khôi phục bằng Mã 6 ký tự -->
+                <form id="form-reset-by-code" style="display: none;">
+                    <div class="form-group">
+                        <label><strong>Mã khôi phục 6 ký tự (đã lưu khi thiết lập) (*)</strong>:</label>
+                        <input type="text" id="reset-input-code" class="form-control" maxlength="8" placeholder="Ví dụ: TR8888 hoặc LN3333" required style="text-transform: uppercase; font-size: 18px; letter-spacing: 4px; text-align: center; font-weight: bold;">
+                        <small style="color: var(--text-muted); font-size: 12px; display: block; margin-top: 4px;">
+                            💡 Mã được in trên Thẻ Khôi Phục hoặc do cấp trên cấp lại.
+                        </small>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label><strong>Mật khẩu mới muốn đặt (từ 6 - 16 ký tự) (*)</strong>:</label>
+                        <input type="password" id="reset-input-new-pin-c" class="form-control" maxlength="16" placeholder="Nhập mật khẩu mới..." required style="font-size: 18px; letter-spacing: 4px; text-align: center;">
+                    </div>
+                    <button type="submit" class="btn-royal w-100" style="margin-top: 16px; padding: 10px;">
+                        ✅ Đặt Lại Mật Khẩu Ngay
+                    </button>
+                </form>
+
+                <div style="margin-top: 14px; text-align: center; font-size: 12.5px; color: var(--text-muted);">
+                    Nếu quên cả 2 phương thức, vui lòng liên hệ <strong>Tổng Quản Trần Văn Thuần</strong> (ĐT/Zalo: <a href="tel:0977181611" style="color: var(--primary-red); font-weight: bold; text-decoration: underline;">0977.181.611</a>) để được cấp lại mã kích hoạt trong Bảng Điều Phối.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL BỔ SUNG SỬ LIỆU & GÓP Ý GIA PHẢ ================= -->
+    <div class="modal-overlay" id="modal-contribute-history">
+        <div class="modal-container" style="max-width: 580px;">
+            <button class="modal-close-btn">&times;</button>
+            <div class="modal-body" style="padding: 24px;">
+                <div class="text-center" style="margin-bottom: 18px;">
+                    <div style="font-size: 28px;">✍️</div>
+                    <h3 class="text-gold" style="font-family: var(--font-royal); margin: 6px 0;">BỒI ĐẮP &amp; BỔ SUNG SỬ LIỆU GIA TỘC</h3>
+                    <div style="font-size: 13px; color: var(--text-muted);">
+                        Công trình mở phụng sự đạo hiếu — Chung tay cùng các bậc cao niên ghi chép vẹn toàn sử phả
+                    </div>
+                </div>
+
+                <div style="background: rgba(212, 175, 55, 0.1); border: 1px dashed var(--gold); border-radius: 6px; padding: 12px 16px; margin-bottom: 16px;">
+                    <div style="font-size: 13px; color: var(--gold-dark); font-weight: bold;">VỊ TIỀN NHÂN ĐƯỢC BỔ SUNG:</div>
+                    <div id="contrib-member-info" style="font-size: 15px; font-weight: bold; color: var(--primary-red); margin-top: 2px;">—</div>
+                    <div id="contrib-lack-hint" style="font-size: 12px; color: #92400e; margin-top: 4px; font-style: italic;"></div>
+                </div>
+
+                <form id="form-contribute-history">
+                    <input type="hidden" id="contrib-member-id" value="">
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label><strong>Họ tên con cháu đóng góp (*)</strong>:</label>
+                            <input type="text" id="contrib-sender-name" class="form-control" placeholder="Ví dụ: Trần Văn Long" required>
+                        </div>
+                        <div class="form-group">
+                            <label><strong>Số điện thoại / Zalo (*)</strong>:</label>
+                            <input type="text" id="contrib-sender-phone" class="form-control" placeholder="Ví dụ: 0912.345.678" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label><strong>Mối quan hệ / Thuộc Chi Nhánh nào</strong>:</label>
+                        <input type="text" id="contrib-sender-branch" class="form-control" placeholder="Ví dụ: Hậu duệ Đời 24 • Nhánh ông Vượng">
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label><strong>Nội dung sử liệu bổ sung / Giai thoại truyền thừa (*)</strong>:</label>
+                        <textarea id="contrib-content" class="form-control" rows="4" placeholder="Kính ghi rõ: Năm sinh, ngày giỗ âm lịch, nơi an táng/mộ phần, tên phối ngẫu hoặc công đức của cụ..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-royal w-100" style="margin-top: 16px; padding: 11px; font-size: 14.5px;">
+                        📜 Gửi Bổ Sung Sử Liệu Tới Ban Quản Trị
+                    </button>
+                </form>
+
+                <div style="margin-top: 12px; text-align: center; font-size: 12px; color: var(--text-muted);">
+                    ✦ Thông tin đóng góp sẽ được lưu vào Sổ Bồi Đắp Phả Ký và chuyển tới Ban Quản Trị thẩm định đưa vào chính phả.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST THÔNG BÁO NHANH TRÊN TRANG CHÍNH -->
+    <div id="index-toast" class="admin-toast">
+        <span id="index-toast-icon">✅</span>
+        <span id="index-toast-message">Đã lưu thay đổi thành công!</span>
+    </div>
+
+    <!-- ================= THƯ VIỆN JAVASCRIPT CỤC BỘ (100% OFFLINE) ================= -->
+    <script src="libs/d3.min.js"></script>
+    <script src="libs/xlsx.full.min.js"></script>
+
+    <!-- ================= CÁC MODULE DỮ LIỆU ĐA NHÁNH ================= -->
+    <script src="data/data_truc_chinh.js"></script>
+    <script src="data/data_chi_1.js"></script>
+    <script src="data/data_chi_2.js"></script>
+    <script src="data/data_chi_lang_nam.js"></script>
+    <script src="data/data_manager.js"></script>
+
+    <!-- ================= CÁC MODULE ỨNG DỤNG ================= -->
+    <script src="js/lunar.js"></script>
+    <script src="js/idb-storage.js"></script>
+    <script src="js/auth_manager.js"></script>
+    <script src="js/tts-assistant.js"></script>
+    <script src="js/incense.js"></script>
+    <script src="js/tree-classic.js"></script>
+    <script src="js/family-chart.js"></script>
+    <script src="js/galaxy-orbit.js"></script>
+    <script src="js/book-view.js"></script>
+    <script src="js/golden-search.js"></script>
+    <script src="js/sync.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,17 @@
+# Backup folders
+backup_bds_tamhung/
+backup_cu_petros/
+backup_hongthinh/
+backup_petros_vankhanh/
+
+# Temporary / unused image files
+930ef3b3-303e-4b90-a453-81fb49c72c8a.png
+Gemini_Generated_Image_c4qjtwc4qjtwc4qj.png
+
+# System & Editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.log

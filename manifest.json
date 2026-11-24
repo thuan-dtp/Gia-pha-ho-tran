@@ -1,0 +1,22 @@
+{
+  "name": "GIA PHẢ HỌ TRẦN VIỆT NAM — Tinh Hoa Truyền Thừa & Kết Nối Các Chi Phái",
+  "short_name": "Gia Phả Họ Trần VN",
+  "description": "Ứng dụng gia phả số đại tộc Họ Trần Việt Nam hoạt động 100% ngoại tuyến, kết nối các chi phái toàn quốc",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#5b0606",
+  "theme_color": "#5b0606",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "assets/icon_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
