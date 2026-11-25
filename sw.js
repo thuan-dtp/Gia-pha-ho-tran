@@ -3,7 +3,7 @@
  * Lưu trữ và phục vụ toàn bộ ứng dụng khi thiết bị không có mạng Internet.
  */
 
-const CACHE_NAME = "giapha-hotran-v6.0.1-tts-vietnamese-fix";
+const CACHE_NAME = "giapha-hotran-v6.0.2-mobile-responsive-fix";
 
 const ASSETS_TO_CACHE = [
     "./",
@@ -11,6 +11,7 @@ const ASSETS_TO_CACHE = [
     "./admin.html",
     "./manifest.json",
     "./css/style.css",
+    "./css/styles.css",
     "./css/modal.css",
     "./css/responsive.css",
     "./libs/d3.min.js",
