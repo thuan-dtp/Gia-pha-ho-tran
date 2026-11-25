@@ -625,9 +625,9 @@ window.showMemberDetailModal = function(memberId) {
                     </div>
                     <div class="member-tts-speed">
                         <span class="speed-label">Tốc độ:</span>
-                        <button type="button" class="btn-tts-speed ${window.ttsAssistant && window.ttsAssistant.rate <= 0.92 ? 'active' : ''}" onclick="window.ttsSetRate(0.85, this)" title="Đọc chậm (0.85x)">🐢 Chậm</button>
-                        <button type="button" class="btn-tts-speed ${!window.ttsAssistant || (window.ttsAssistant.rate > 0.92 && window.ttsAssistant.rate < 1.1) ? 'active' : ''}" onclick="window.ttsSetRate(1.0, this)" title="Đọc vừa chuẩn tự nhiên (1.0x)">🚶 Vừa</button>
-                        <button type="button" class="btn-tts-speed ${window.ttsAssistant && window.ttsAssistant.rate >= 1.1 ? 'active' : ''}" onclick="window.ttsSetRate(1.2, this)" title="Đọc nhanh (1.2x)">⚡ Nhanh</button>
+                        <button type="button" class="btn-tts-speed ${window.ttsAssistant && window.ttsAssistant.rate <= 0.8 ? 'active' : ''}" onclick="window.ttsSetRate(0.75, this)" title="Đọc chậm">🐢 Chậm</button>
+                        <button type="button" class="btn-tts-speed ${!window.ttsAssistant || (window.ttsAssistant.rate > 0.8 && window.ttsAssistant.rate < 1.15) ? 'active' : ''}" onclick="window.ttsSetRate(0.95, this)" title="Đọc vừa chuẩn">🚶 Vừa</button>
+                        <button type="button" class="btn-tts-speed ${window.ttsAssistant && window.ttsAssistant.rate >= 1.15 ? 'active' : ''}" onclick="window.ttsSetRate(1.2, this)" title="Đọc nhanh">⚡ Nhanh</button>
                     </div>
                 </div>
             </div>
@@ -763,12 +763,24 @@ function initNetworkMonitor() {
 }
 
 /**
- * Đăng ký Service Worker
+ * Đăng ký Service Worker & Tự động làm mới ngay khi có phiên bản mới
  */
 function registerServiceWorker() {
     if ("serviceWorker" in navigator && window.location.protocol.startsWith("http")) {
-        navigator.serviceWorker.register("./sw.js")
-            .then(reg => console.log("Service Worker đăng ký thành công:", reg.scope))
+        let refreshing = false;
+        const hadController = !!navigator.serviceWorker.controller;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (hadController && !refreshing) {
+                refreshing = true;
+                window.location.reload();
+            }
+        });
+
+        navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" })
+            .then(reg => {
+                console.log("Service Worker đăng ký thành công:", reg.scope);
+                reg.update().catch(() => {});
+            })
             .catch(err => console.log("Chạy trực tiếp file local hoặc lỗi Service Worker:", err));
     }
 }

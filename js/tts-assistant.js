@@ -1,9 +1,8 @@
 /**
- * TRỢ LÝ GIỌNG ĐỌC NỮ TIẾNG VIỆT NAM CHUẨN (vi-VN) CHO NGƯỜI CAO TUỔI
- * - Khóa cứng ngôn ngữ vi-VN
- * - Ưu tiên giọng Nữ Tiếng Việt tự nhiên: Microsoft HoaiMy Online / HoaiMy -> Linh -> Google Tiếng Việt -> vi-VN
- * - Cao độ chuẩn tự nhiên pitch = 1.0; Tốc độ: Chậm (0.85) | Vừa (1.0) | Nhanh (1.2)
- * - Tách câu ngắn tự nhiên, chống cắt ngang câu và chống kẹt nút Tạm dừng / Tiếp tục / Dừng.
+ * TRỢ LÝ GIỌNG ĐỌC TIẾNG VIỆT (TEXT-TO-SPEECH) CHO NGƯỜI CAO TUỔI
+ * Sử dụng Web Speech API chuẩn HTML5, hoạt động 100% offline,
+ * hỗ trợ phân đoạn văn bản thông minh (chunking) chống ngắt quãng trên Chrome/Edge/Safari,
+ * điều chỉnh tốc độ đọc Chậm / Vừa / Nhanh và thanh điều khiển nổi tinh tế.
  */
 
 class TTSAssistant {
@@ -11,153 +10,117 @@ class TTSAssistant {
         this.synth = window.speechSynthesis || null;
         this.utterance = null;
         this.voice = null;
-        this.pitch = 1.0; // Cao độ chuẩn tự nhiên cho giọng Nữ Tiếng Việt
-        this.rate = 1.0;  // Mặc định mức "Vừa" (1.0), Chậm (0.85), Nhanh (1.2)
+        this.rate = 0.95; // Mặc định tốc độ khoan thai, rõ tiếng cho các cụ cao niên
         this.isPlaying = false;
         this.isPaused = false;
         this.currentTitle = "";
         this.currentChunks = [];
         this.chunkIndex = 0;
         this.floatingBarEl = null;
-        this.playSessionId = 0;
-        this._chunkTimer = null;
-        this._voicePollTimer = null;
-        this._voicePollCount = 0;
 
         this.initVoice();
         if (this.synth) {
-            // Lắng nghe đầy đủ sự kiện onvoiceschanged để không bao giờ rơi về giọng tiếng Anh
+            // Lắng nghe sự kiện nạp danh sách giọng đọc của trình duyệt
             this.synth.onvoiceschanged = () => this.initVoice();
-            if (typeof this.synth.addEventListener === "function") {
-                this.synth.addEventListener("voiceschanged", () => this.initVoice());
+            if (typeof this.synth.addEventListener === 'function') {
+                this.synth.addEventListener('voiceschanged', () => this.initVoice());
             }
-            // Vòng kiểm tra lặp 300ms tối đa 10 lần nếu trình duyệt nạp danh sách giọng chậm
-            this.startVoicePolling();
+            // Quét định kỳ lúc mới mở trang để bắt ngay giọng vi-VN khi trình duyệt nạp chậm
+            let tries = 0;
+            const timer = setInterval(() => {
+                tries++;
+                this.initVoice();
+                if (this.voice || tries >= 12) {
+                    clearInterval(timer);
+                }
+            }, 250);
         }
     }
 
     /**
-     * Kiểm tra lặp 300ms (tối đa 10 lần) để bắt kịp giọng Nữ Online nạp bất đồng bộ
+     * Lọc và khóa cứng giọng đọc Nữ Tiếng Việt Nam (vi-VN) chuẩn tự nhiên nhất
      */
-    startVoicePolling() {
-        if (!this.synth) return;
-        if (this._voicePollTimer) clearInterval(this._voicePollTimer);
-        this._voicePollCount = 0;
-
-        this._voicePollTimer = setInterval(() => {
-            this._voicePollCount++;
-            this.initVoice();
-            const isTopHoaiMy = this.voice && /hoai\s*my|hoài\s*my/i.test(this.voice.name || "") && /online/i.test(this.voice.name || "");
-            if (isTopHoaiMy || this._voicePollCount >= 10) {
-                clearInterval(this._voicePollTimer);
-                this._voicePollTimer = null;
-            }
-        }, 300);
-    }
-
-    /**
-     * Lọc và ưu tiên chọn giọng NỮ Tiếng Việt Nam (vi-VN) tự nhiên nhất
-     * Loại bỏ ưu tiên giọng Nam (NamMinh, male)
-     */
-    selectVietnameseVoiceProfile() {
-        if (!this.synth) return { voice: null, pitch: 1.0 };
+    getVietnameseVoice() {
+        if (!this.synth) return null;
         const voices = this.synth.getVoices() || [];
-        if (!voices || voices.length === 0) return { voice: null, pitch: 1.0 };
+        if (!voices || voices.length === 0) return null;
 
-        // Lọc toàn bộ danh sách giọng Tiếng Việt (vi-VN / vi_VN / Vietnamese)
+        // Lọc các giọng thuộc ngôn ngữ Tiếng Việt (vi-VN / vi_VN / vi)
         const viVoices = voices.filter(v => {
-            const lang = (v.lang || "").toLowerCase();
-            const name = (v.name || "").toLowerCase();
+            const lang = (v.lang || '').toLowerCase();
+            const name = (v.name || '').toLowerCase();
             return (
-                lang === "vi-vn" ||
-                lang === "vi_vn" ||
-                lang.startsWith("vi") ||
-                lang.includes("vi-") ||
-                name.includes("vietnam") ||
-                name.includes("tiếng việt") ||
-                name.includes("tieng viet") ||
-                name.includes("hoaimy") ||
-                name.includes("hoài my") ||
-                name.includes("namminh")
+                lang === 'vi-vn' ||
+                lang === 'vi_vn' ||
+                lang.startsWith('vi-') ||
+                lang.startsWith('vi_') ||
+                lang === 'vi' ||
+                name.includes('tiếng việt') ||
+                name.includes('tieng viet') ||
+                name.includes('vietnamese') ||
+                name.includes('hoaimy') ||
+                name.includes('hoài my')
             );
         });
 
         if (viVoices.length === 0) {
-            // Tuyệt đối không chọn voices[0] tiếng Anh
-            return { voice: null, pitch: 1.0 };
+            // TUYỆT ĐỐI không gán voices[0] để không bao giờ bị rơi về giọng tiếng Anh mặc định (David/Zira)
+            return null;
         }
 
-        const isMaleName = (rawName) => {
-            const stripped = (rawName || "").replace(/việt\s*nam|viet\s*nam|vietnamese/gi, " ");
-            return /namminh|nam\s*minh|\bmale\b|giọng\s*nam|giong\s*nam|\ban\b|\bnam\b/i.test(stripped);
-        };
+        // 1. Ưu tiên cao nhất: Giọng Nữ Tiếng Việt tự nhiên (Google Tiếng Việt, Microsoft HoaiMy, Linh)
+        const femalePriority = [
+            'google tiếng việt',
+            'google vietnamese',
+            'microsoft hoaimy online',
+            'hoaimy',
+            'hoài my',
+            'linh'
+        ];
 
-        const isExplicitFemale = (rawName) => {
-            const name = (rawName || "").toLowerCase();
-            return /hoaimy|hoài\s*my|\blinh\b|female|\bnữ\b|\bnu\b|giọng\s*nữ|giong\s*nu/i.test(name);
-        };
+        for (const kw of femalePriority) {
+            const found = viVoices.find(v => (v.name || '').toLowerCase().includes(kw));
+            if (found) return found;
+        }
 
-        // 1. Ưu tiên số 1: Microsoft HoaiMy Online (giọng Nữ Tiếng Việt tự nhiên nhất trên Edge/Windows)
-        const msHoaiMyOnline = viVoices.find(v => {
-            const n = v.name || "";
-            return /hoai\s*my|hoài\s*my/i.test(n) && /online/i.test(n);
+        // 2. Ưu tiên giọng Nữ hoặc giọng chuẩn mang mã vi-VN / vi_VN
+        const femaleViVn = viVoices.find(v => {
+            const lang = (v.lang || '').toLowerCase();
+            const name = (v.name || '').toLowerCase();
+            const isViVn = (lang === 'vi-vn' || lang === 'vi_vn');
+            const isFemale = name.includes('female') || name.includes('nữ');
+            return isViVn && isFemale;
         });
-        if (msHoaiMyOnline) {
-            return { voice: msHoaiMyOnline, pitch: 1.0 };
-        }
+        if (femaleViVn) return femaleViVn;
 
-        // 2. Ưu tiên số 2: Microsoft HoaiMy / Linh hoặc các giọng Nữ Tiếng Việt khác
-        const hoaiMyOrLinh = viVoices.find(v => isExplicitFemale(v.name) && !isMaleName(v.name));
-        if (hoaiMyOrLinh) {
-            return { voice: hoaiMyOrLinh, pitch: 1.0 };
-        }
+        // 3. Bất kỳ giọng chuẩn vi-VN / vi_VN nào của trình duyệt (ưu tiên giọng Google / Nữ tự nhiên)
+        const googleAnyVi = viVoices.find(v => (v.name || '').toLowerCase().includes('google'));
+        if (googleAnyVi) return googleAnyVi;
 
-        // 3. Ưu tiên số 3: Google Tiếng Việt / Google Vietnamese (giọng nữ tự nhiên chuẩn trên Chrome/Android)
-        const googleVi = viVoices.find(v => /google/i.test(v.name || "") && !isMaleName(v.name));
-        if (googleVi) {
-            return { voice: googleVi, pitch: 1.0 };
-        }
+        const standardViVn = viVoices.find(v => {
+            const lang = (v.lang || '').toLowerCase();
+            const name = (v.name || '').toLowerCase();
+            return (lang === 'vi-vn' || lang === 'vi_vn') && !name.includes('male');
+        });
+        if (standardViVn) return standardViVn;
 
-        // 4. Ưu tiên số 4: Bất kỳ giọng vi-VN / vi_VN nào không phải giọng nam
-        const nonMaleVi = viVoices.find(v => !isMaleName(v.name));
-        if (nonMaleVi) {
-            return { voice: nonMaleVi, pitch: 1.0 };
-        }
-
-        // 5. Dự phòng cuối cùng nếu thiết bị chỉ có duy nhất 1 giọng tiếng Việt
-        return { voice: viVoices[0], pitch: 1.0 };
-    }
-
-    /**
-     * Tương thích API lấy đối tượng SpeechSynthesisVoice Nữ Tiếng Việt chuẩn nhất
-     */
-    getVietnameseVoice() {
-        const profile = this.selectVietnameseVoiceProfile();
-        this.pitch = 1.0;
-        return profile.voice;
+        // 4. Dự phòng giọng vi-VN bất kỳ có trên máy
+        return viVoices[0];
     }
 
     initVoice() {
         if (!this.synth) return;
-        const profile = this.selectVietnameseVoiceProfile();
-        this.pitch = 1.0;
-        if (profile.voice) {
-            const prevName = this.voice ? this.voice.name : "";
-            this.voice = profile.voice;
-            if (prevName !== profile.voice.name) {
-                console.log(
-                    "TTS Assistant: Đã khóa cứng giọng đọc Nữ Tiếng Việt:",
-                    profile.voice.name,
-                    `(${profile.voice.lang})`
-                );
-            }
+        const viVoice = this.getVietnameseVoice();
+        if (viVoice) {
+            this.voice = viVoice;
+            console.log("TTS Assistant: Đã khóa cứng giọng đọc tiếng Việt:", viVoice.name, `(${viVoice.lang})`);
         } else {
             this.voice = null;
         }
     }
 
     /**
-     * Thông báo thân thiện khi thiết bị chưa có gói giọng Tiếng Việt
+     * Thông báo thân thiện khi hệ điều hành máy tính chưa cài sẵn giọng đọc tiếng Việt
      */
     showDefaultVoiceNotice() {
         const msg = "Trình duyệt đang dùng giọng mặc định, khuyên dùng Microsoft Edge hoặc Chrome có kết nối mạng để nghe giọng Tiếng Việt Nam chuẩn nhất.";
@@ -171,71 +134,31 @@ class TTSAssistant {
     }
 
     /**
-     * Chia văn bản thành từng câu ngắn theo dấu chấm (.), dấu chấm phẩy (;), dấu hỏi/chấm than và xuống dòng
-     * giúp ngắt nghỉ tự nhiên, mượt mà và không bị cắt ngang câu
+     * Tách văn bản thành các câu ngắn để Web Speech API đọc mượt mà không bị timeout
      */
     splitIntoSentences(text) {
         if (!text) return [];
+        // Xóa mã HTML nếu có
+        const clean = text.replace(/<[^>]*>/g, " ")
+                          .replace(/\s+/g, " ")
+                          .trim();
+        // Tách câu theo dấu chấm, chấm phẩy, hai chấm, chấm than, hỏi chấm, xuống dòng
+        const rawSentences = clean.split(/(?<=[.!?:;\n])\s+/);
+        const result = [];
+        let buffer = "";
 
-        const normalized = String(text)
-            .replace(/<\s*br\s*\/?>/gi, "\n")
-            .replace(/<\/(p|div|li|h[1-6])>/gi, "\n")
-            .replace(/<[^>]*>/g, " ")
-            .replace(/[ \t]+/g, " ")
-            .trim();
-
-        if (!normalized) return [];
-
-        // Tách câu theo xuống dòng, dấu chấm phẩy (;), chấm than (!), hỏi chấm (?) và dấu chấm câu (.)
-        // Bảo vệ các dãy số như 0977.181.611 không bị tách vụn
-        const rawParts = normalized
-            .split(/(?:\r?\n)+|(?<=[!?;])\s+|(?<!\d)\.(?!\d)\s+/)
-            .map(s => s.trim())
-            .filter(Boolean);
-
-        const sentences = [];
-        for (const part of rawParts) {
-            if (part.length <= 185) {
-                sentences.push(part);
+        for (let s of rawSentences) {
+            s = s.trim();
+            if (!s) continue;
+            if ((buffer + " " + s).length < 160) {
+                buffer = buffer ? buffer + " " + s : s;
             } else {
-                const subClauses = part.split(/(?<=[,:])\s+/);
-                let buffer = "";
-                for (const clause of subClauses) {
-                    const cleanClause = clause.trim();
-                    if (!cleanClause) continue;
-                    if (!buffer) {
-                        buffer = cleanClause;
-                    } else if ((buffer + " " + cleanClause).length <= 175) {
-                        buffer += " " + cleanClause;
-                    } else {
-                        sentences.push(buffer);
-                        buffer = cleanClause;
-                    }
-                }
-                if (buffer) sentences.push(buffer);
+                if (buffer) result.push(buffer);
+                buffer = s;
             }
         }
-
-        return sentences.length ? sentences : [normalized];
-    }
-
-    /**
-     * Hủy hàng đợi phát âm cũ an toàn trên mọi trình duyệt
-     */
-    safeCancelSynth() {
-        if (this._chunkTimer) {
-            clearTimeout(this._chunkTimer);
-            this._chunkTimer = null;
-        }
-        if (!this.synth) return;
-        try {
-            if (this.synth.paused) {
-                this.synth.resume();
-            }
-            this.synth.cancel();
-        } catch (e) {
-            console.warn("TTS cancel warning:", e);
-        }
+        if (buffer) result.push(buffer);
+        return result.length ? result : [clean];
     }
 
     /**
@@ -247,52 +170,52 @@ class TTSAssistant {
             return;
         }
 
-        // Gọi window.speechSynthesis.cancel() sạch sẽ trước khi phát mới
-        this.playSessionId++;
-        this.safeCancelSynth();
-        this.isPlaying = false;
-        this.isPaused = false;
-
-        // Cập nhật lại giọng Nữ Tiếng Việt tốt nhất ngay trước khi phát
-        const profile = this.selectVietnameseVoiceProfile();
-        this.pitch = 1.0;
-        if (profile.voice) {
-            this.voice = profile.voice;
-        } else {
-            this.voice = null;
-            this.showDefaultVoiceNotice();
-        }
+        // Dừng câu đọc trước nếu đang chạy
+        this.stop(false);
 
         this.currentTitle = title || "Đang đọc gia phả...";
         this.currentChunks = this.splitIntoSentences(fullText);
         this.chunkIndex = 0;
 
-        if (this.currentChunks.length === 0) {
-            this.updateBarUI();
-            return;
-        }
+        if (this.currentChunks.length === 0) return;
 
         this.isPlaying = true;
         this.isPaused = false;
         this.showFloatingBar();
-        this.updateBarUI();
 
-        const currentSession = this.playSessionId;
-        this._chunkTimer = setTimeout(() => {
-            if (currentSession === this.playSessionId && this.isPlaying) {
-                this.speakNextChunk(currentSession);
+        const startSpeaking = () => {
+            if (!this.isPlaying) return;
+            const viVoice = this.getVietnameseVoice();
+            if (viVoice) {
+                this.voice = viVoice;
+            } else {
+                this.voice = null;
+                this.showDefaultVoiceNotice();
             }
-        }, 40);
+            this.speakNextChunk();
+        };
+
+        // Nếu trình duyệt vừa mở trang đang nạp danh sách getVoices() bất đồng bộ, chờ tối đa 400ms để bắt trúng giọng vi-VN
+        const initialVoices = this.synth.getVoices() || [];
+        if (initialVoices.length === 0) {
+            let waited = 0;
+            const waitVoices = setInterval(() => {
+                waited += 50;
+                const loaded = this.synth.getVoices() || [];
+                if (loaded.length > 0 || waited >= 400) {
+                    clearInterval(waitVoices);
+                    startSpeaking();
+                }
+            }, 50);
+        } else {
+            startSpeaking();
+        }
     }
 
-    speakNextChunk(sessionId = this.playSessionId) {
-        if (sessionId !== this.playSessionId) return;
-
+    speakNextChunk() {
         if (!this.isPlaying || this.chunkIndex >= this.currentChunks.length) {
             this.isPlaying = false;
             this.isPaused = false;
-            this.utterance = null;
-            this.updateBarUI();
             this.hideFloatingBar();
             return;
         }
@@ -300,53 +223,32 @@ class TTSAssistant {
         const sentence = this.currentChunks[this.chunkIndex];
         const utter = new SpeechSynthesisUtterance(sentence);
 
-        // Khóa cứng ngôn ngữ vi-VN và cao độ chuẩn tự nhiên cho giọng Nữ
-        utter.lang = "vi-VN";
+        // Bắt buộc gán utterance.lang = 'vi-VN' cho mọi đoạn đọc
+        utter.lang = 'vi-VN';
         utter.rate = this.rate;
         utter.pitch = 1.0;
-        utter.volume = 1.0;
 
-        const profile = this.selectVietnameseVoiceProfile();
-        const selectedVoice = profile.voice || this.voice;
-        if (selectedVoice) {
-            this.voice = selectedVoice;
-            utter.voice = selectedVoice;
+        // Bắt buộc gọi getVoices() và gán thẳng utterance.voice vào giọng Tiếng Việt Nam chuẩn
+        const currentViVoice = this.getVietnameseVoice() || this.voice;
+        if (currentViVoice) {
+            this.voice = currentViVoice;
+            utter.voice = currentViVoice;
+        } else {
+            // Không gán utter.voice để trình duyệt nhận diện theo utter.lang = 'vi-VN'
         }
 
         utter.onend = () => {
-            if (sessionId !== this.playSessionId) return;
             if (this.isPlaying && !this.isPaused) {
                 this.chunkIndex++;
-                if (this.chunkIndex >= this.currentChunks.length) {
-                    this.isPlaying = false;
-                    this.isPaused = false;
-                    this.utterance = null;
-                    this.updateBarUI();
-                    this.hideFloatingBar();
-                } else {
-                    this._chunkTimer = setTimeout(() => {
-                        if (sessionId === this.playSessionId && this.isPlaying && !this.isPaused) {
-                            this.speakNextChunk(sessionId);
-                        }
-                    }, 90);
-                }
+                this.speakNextChunk();
             }
         };
 
         utter.onerror = (e) => {
-            if (sessionId !== this.playSessionId) return;
-            const errType = e && e.error ? String(e.error).toLowerCase() : "";
-            if (errType === "canceled" || errType === "interrupted") {
-                return;
-            }
             console.warn("TTS chunk warning:", e);
             if (this.isPlaying && !this.isPaused) {
                 this.chunkIndex++;
-                this._chunkTimer = setTimeout(() => {
-                    if (sessionId === this.playSessionId && this.isPlaying && !this.isPaused) {
-                        this.speakNextChunk(sessionId);
-                    }
-                }, 60);
+                this.speakNextChunk();
             }
         };
 
@@ -357,95 +259,39 @@ class TTSAssistant {
 
     pause() {
         if (!this.synth || !this.isPlaying || this.isPaused) return;
-        if (this._chunkTimer) {
-            clearTimeout(this._chunkTimer);
-            this._chunkTimer = null;
-        }
-        try {
-            if (this.synth.speaking && !this.synth.paused) {
-                this.synth.pause();
-            }
-        } catch (e) {
-            console.warn("TTS pause warning:", e);
-        }
+        this.synth.pause();
         this.isPaused = true;
         this.updateBarUI();
     }
 
     resume() {
         if (!this.synth || !this.isPlaying || !this.isPaused) return;
+        this.synth.resume();
         this.isPaused = false;
-        const sessionId = this.playSessionId;
-        try {
-            if (this.synth.paused) {
-                this.synth.resume();
-            }
-        } catch (e) {
-            console.warn("TTS resume warning:", e);
-        }
         this.updateBarUI();
-
-        setTimeout(() => {
-            if (sessionId === this.playSessionId && this.isPlaying && !this.isPaused && !this.synth.speaking) {
-                this.speakNextChunk(sessionId);
-            }
-        }, 220);
-    }
-
-    /**
-     * Đảo trạng thái Tạm dừng <-> Tiếp tục mượt mà
-     */
-    togglePause() {
-        if (!this.synth || !this.isPlaying) return;
-        if (this.isPaused) {
-            this.resume();
-        } else {
-            this.pause();
-        }
     }
 
     stop(hideBar = true) {
-        this.playSessionId++;
-        this.safeCancelSynth();
+        if (!this.synth) return;
+        this.synth.cancel();
         this.isPlaying = false;
         this.isPaused = false;
         this.chunkIndex = 0;
         this.currentChunks = [];
-        this.utterance = null;
-        this.updateBarUI();
         if (hideBar) {
             this.hideFloatingBar();
         }
     }
 
     setRate(newRate) {
-        const parsed = parseFloat(newRate);
-        if (!isNaN(parsed)) {
-            this.rate = parsed;
-        }
+        this.rate = newRate;
         if (this.isPlaying) {
-            this.playSessionId++;
-            this.isPaused = false;
-            this.safeCancelSynth();
-            const sessionId = this.playSessionId;
-            this.updateBarUI();
-            this._chunkTimer = setTimeout(() => {
-                if (sessionId === this.playSessionId && this.isPlaying) {
-                    this.speakNextChunk(sessionId);
-                }
-            }, 40);
+            // Khởi động lại chunk hiện tại với tốc độ mới
+            this.synth.cancel();
+            this.speakNextChunk();
         } else {
             this.updateBarUI();
         }
-    }
-
-    /**
-     * Kiểm tra mức tốc độ đang chọn: Chậm (0.85) | Vừa (1.0) | Nhanh (1.2)
-     */
-    getRateMode() {
-        if (this.rate <= 0.92) return "slow";
-        if (this.rate >= 1.1) return "fast";
-        return "normal";
     }
 
     /**
@@ -460,7 +306,6 @@ class TTSAssistant {
             document.body.appendChild(bar);
         }
 
-        const mode = this.getRateMode();
         bar.innerHTML = `
             <div class="tts-bar-content">
                 <div class="tts-pulse-icon">
@@ -474,26 +319,30 @@ class TTSAssistant {
                     <div class="tts-current-text" id="tts-bar-title">${this.currentTitle}</div>
                 </div>
                 <div class="tts-controls">
-                    <button type="button" class="tts-btn-act" id="tts-btn-toggle" title="Tạm dừng / Tiếp tục">
-                        ${this.isPaused ? "▶️ Tiếp tục" : "⏸️ Tạm dừng"}
+                    <button class="tts-btn-act" id="tts-btn-toggle" title="Tạm dừng / Tiếp tục">
+                        ${this.isPaused ? '▶️ Tiếp tục' : '⏸️ Tạm dừng'}
                     </button>
-                    <button type="button" class="tts-btn-act" id="tts-btn-stop" title="Dừng đọc">
+                    <button class="tts-btn-act" id="tts-btn-stop" title="Dừng đọc">
                         ⏹️ Dừng
                     </button>
                     <div class="tts-rate-selector">
                         <span class="tts-rate-label">Tốc độ:</span>
-                        <button type="button" class="tts-btn-rate ${mode === "slow" ? "active" : ""}" data-rate="0.85" title="Đọc chậm cho người cao tuổi (0.85x)">Chậm</button>
-                        <button type="button" class="tts-btn-rate ${mode === "normal" ? "active" : ""}" data-rate="1.0" title="Đọc vừa chuẩn tự nhiên (1.0x)">Vừa</button>
-                        <button type="button" class="tts-btn-rate ${mode === "fast" ? "active" : ""}" data-rate="1.2" title="Đọc nhanh (1.2x)">Nhanh</button>
+                        <button class="tts-btn-rate ${this.rate <= 0.8 ? 'active' : ''}" data-rate="0.75" title="Đọc chậm cho người cao tuổi">Chậm</button>
+                        <button class="tts-btn-rate ${this.rate > 0.8 && this.rate < 1.15 ? 'active' : ''}" data-rate="0.95" title="Đọc vừa chuẩn">Vừa</button>
+                        <button class="tts-btn-rate ${this.rate >= 1.15 ? 'active' : ''}" data-rate="1.2" title="Đọc nhanh">Nhanh</button>
                     </div>
-                    <button type="button" class="tts-btn-close" id="tts-btn-close" title="Đóng thanh giọng đọc">✕</button>
+                    <button class="tts-btn-close" id="tts-btn-close" title="Đóng thanh giọng đọc">✕</button>
                 </div>
             </div>
         `;
 
+        // Gắn sự kiện các nút
         const btnToggle = bar.querySelector("#tts-btn-toggle");
         if (btnToggle) {
-            btnToggle.onclick = () => this.togglePause();
+            btnToggle.onclick = () => {
+                if (this.isPaused) this.resume();
+                else this.pause();
+            };
         }
 
         const btnStop = bar.querySelector("#tts-btn-stop");
@@ -509,8 +358,10 @@ class TTSAssistant {
         const rateBtns = bar.querySelectorAll(".tts-btn-rate");
         rateBtns.forEach(btn => {
             btn.onclick = (e) => {
-                const r = parseFloat(e.currentTarget.dataset.rate);
+                const r = parseFloat(e.target.dataset.rate);
                 this.setRate(r);
+                rateBtns.forEach(b => b.classList.remove("active"));
+                e.target.classList.add("active");
             };
         });
 
@@ -518,49 +369,17 @@ class TTSAssistant {
         this.floatingBarEl = bar;
     }
 
-    /**
-     * Đồng bộ trạng thái nút Tạm dừng / Tiếp tục và nút tốc độ trên cả thanh nổi lẫn các bảng tiểu sử
-     */
     updateBarUI() {
-        const mode = this.getRateMode();
-
         const bar = document.getElementById("tts-floating-bar");
-        if (bar) {
-            const btnToggle = bar.querySelector("#tts-btn-toggle");
-            if (btnToggle) {
-                btnToggle.innerHTML = this.isPaused ? "▶️ Tiếp tục" : "⏸️ Tạm dừng";
-            }
-            const titleEl = bar.querySelector("#tts-bar-title");
-            if (titleEl) {
-                titleEl.textContent = this.currentTitle;
-            }
-            bar.querySelectorAll(".tts-btn-rate").forEach(b => {
-                const r = parseFloat(b.dataset.rate);
-                const bMode = r <= 0.92 ? "slow" : (r >= 1.1 ? "fast" : "normal");
-                b.classList.toggle("active", bMode === mode);
-            });
+        if (!bar) return;
+        const btnToggle = bar.querySelector("#tts-btn-toggle");
+        if (btnToggle) {
+            btnToggle.innerHTML = this.isPaused ? '▶️ Tiếp tục' : '⏸️ Tạm dừng';
         }
-
-        document.querySelectorAll(".btn-tts-pause").forEach(btn => {
-            if (this.isPlaying && this.isPaused) {
-                btn.innerHTML = "▶️ Tiếp Tục";
-                btn.title = "Tiếp tục nghe giọng đọc";
-            } else {
-                btn.innerHTML = "⏸️ Tạm Dừng";
-                btn.title = "Tạm dừng giọng đọc";
-            }
-        });
-
-        document.querySelectorAll(".member-tts-speed .btn-tts-speed").forEach(btn => {
-            const onclickAttr = btn.getAttribute("onclick") || "";
-            if (onclickAttr.includes("0.85") || onclickAttr.includes("0.75") || onclickAttr.includes("0.78")) {
-                btn.classList.toggle("active", mode === "slow");
-            } else if (onclickAttr.includes("1.2") || onclickAttr.includes("1.08")) {
-                btn.classList.toggle("active", mode === "fast");
-            } else {
-                btn.classList.toggle("active", mode === "normal");
-            }
-        });
+        const titleEl = bar.querySelector("#tts-bar-title");
+        if (titleEl) {
+            titleEl.textContent = this.currentTitle;
+        }
     }
 
     hideFloatingBar() {
@@ -659,11 +478,7 @@ window.ttsSpeakMember = function(memberId) {
  * Các hàm điều khiển nhanh giọng đọc cho giao diện bảng tiểu sử
  */
 window.ttsPause = function() {
-    if (window.ttsAssistant) window.ttsAssistant.togglePause();
-};
-
-window.ttsTogglePause = function() {
-    if (window.ttsAssistant) window.ttsAssistant.togglePause();
+    if (window.ttsAssistant) window.ttsAssistant.pause();
 };
 
 window.ttsResume = function() {

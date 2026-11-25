@@ -1,9 +1,9 @@
 /**
- * SERVICE WORKER - OFFLINE FIRST ENGINE
- * Lưu trữ và phục vụ toàn bộ ứng dụng khi thiết bị không có mạng Internet.
+ * SERVICE WORKER - OFFLINE FIRST & INSTANT UPDATE ENGINE
+ * Luôn ưu tiên lấy bản mới nhất khi có mạng và phục vụ Offline 100% khi mất mạng.
  */
 
-const CACHE_NAME = "giapha-hotran-v6.2.1-female-voice-vn";
+const CACHE_NAME = "giapha-hotran-v6.3.0-original-vi-voice";
 
 const ASSETS_TO_CACHE = [
     "./",
@@ -41,17 +41,25 @@ const ASSETS_TO_CACHE = [
     "./js/admin.js"
 ];
 
-// Cài đặt Service Worker và Cache trước tài nguyên
+// Cài đặt Service Worker: bỏ qua HTTP disk-cache cũ để nạp đúng mã nguồn mới nhất
 self.addEventListener("install", (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            console.log("[Service Worker] Đang nạp toàn bộ tài nguyên vào Cache...");
-            return cache.addAll(ASSETS_TO_CACHE);
+            console.log("[Service Worker] Nạp mới tài nguyên v6.3.0 vào Cache...");
+            return Promise.all(
+                ASSETS_TO_CACHE.map((url) =>
+                    fetch(new Request(url, { cache: "reload" })).then((res) => {
+                        if (res && res.status === 200) {
+                            return cache.put(url, res);
+                        }
+                    })
+                )
+            );
         }).then(() => self.skipWaiting())
     );
 });
 
-// Xóa cache cũ khi có phiên bản mới
+// Xóa sạch toàn bộ cache phiên bản cũ ngay khi kích hoạt
 self.addEventListener("activate", (event) => {
     event.waitUntil(
         caches.keys().then((keyList) => {
@@ -67,20 +75,13 @@ self.addEventListener("activate", (event) => {
     );
 });
 
-// Bắt và phản hồi yêu cầu mạng: Cache First, Network Fallback
+// Chiến lược Network-First cho HTML/JS/CSS (không bao giờ kẹt code cũ), Offline Fallback 100%
 self.addEventListener("fetch", (event) => {
-    // Chỉ xử lý các yêu cầu http/https
-    if (!event.request.url.startsWith("http")) return;
+    if (event.request.method !== "GET" || !event.request.url.startsWith("http")) return;
 
     event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
-                // Trả về từ Cache ngay lập tức (siêu tốc, offline 100%)
-                return cachedResponse;
-            }
-
-            // Nếu chưa có trong cache, thử tải từ mạng
-            return fetch(event.request).then((networkResponse) => {
+        fetch(event.request, { cache: "no-cache" })
+            .then((networkResponse) => {
                 if (networkResponse && networkResponse.status === 200) {
                     const responseClone = networkResponse.clone();
                     caches.open(CACHE_NAME).then((cache) => {
@@ -88,12 +89,14 @@ self.addEventListener("fetch", (event) => {
                     });
                 }
                 return networkResponse;
-            }).catch(() => {
-                // Khi mất mạng và không có trong cache, trả về trang chính nếu là điều hướng HTML
-                if (event.request.mode === "navigate") {
-                    return caches.match("./index.html");
-                }
-            });
-        })
+            })
+            .catch(() => {
+                return caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
+                    if (cachedResponse) return cachedResponse;
+                    if (event.request.mode === "navigate") {
+                        return caches.match("./index.html");
+                    }
+                });
+            })
     );
 });

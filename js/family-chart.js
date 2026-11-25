@@ -231,9 +231,9 @@ class FamilyChart {
                         </div>
                         <div class="member-tts-speed">
                             <span class="speed-label">Tốc độ:</span>
-                            <button type="button" class="btn-tts-speed ${window.ttsAssistant && window.ttsAssistant.rate <= 0.92 ? 'active' : ''}" onclick="window.ttsSetRate(0.85, this)" title="Đọc chậm (0.85x)">🐢 Chậm</button>
-                            <button type="button" class="btn-tts-speed ${!window.ttsAssistant || (window.ttsAssistant.rate > 0.92 && window.ttsAssistant.rate < 1.1) ? 'active' : ''}" onclick="window.ttsSetRate(1.0, this)" title="Đọc vừa chuẩn tự nhiên (1.0x)">🚶 Vừa</button>
-                            <button type="button" class="btn-tts-speed ${window.ttsAssistant && window.ttsAssistant.rate >= 1.1 ? 'active' : ''}" onclick="window.ttsSetRate(1.2, this)" title="Đọc nhanh (1.2x)">⚡ Nhanh</button>
+                            <button type="button" class="btn-tts-speed ${window.ttsAssistant && window.ttsAssistant.rate <= 0.8 ? 'active' : ''}" onclick="window.ttsSetRate(0.75, this)" title="Đọc chậm">🐢 Chậm</button>
+                            <button type="button" class="btn-tts-speed ${!window.ttsAssistant || (window.ttsAssistant.rate > 0.8 && window.ttsAssistant.rate < 1.15) ? 'active' : ''}" onclick="window.ttsSetRate(0.95, this)" title="Đọc vừa chuẩn">🚶 Vừa</button>
+                            <button type="button" class="btn-tts-speed ${window.ttsAssistant && window.ttsAssistant.rate >= 1.15 ? 'active' : ''}" onclick="window.ttsSetRate(1.2, this)" title="Đọc nhanh">⚡ Nhanh</button>
                         </div>
                     </div>
                 </div>
