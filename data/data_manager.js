@@ -120,6 +120,50 @@ class DataManager {
     }
 
     /**
+     * Thêm mới hoặc cập nhật 1 thành viên đồng bộ giữa bộ nhớ RAM và IndexedDB
+     */
+    async putMember(member) {
+        if (!member || !member.id) return null;
+        const idx = this.members.findIndex(m => m.id === member.id);
+        if (idx >= 0) {
+            this.members[idx] = { ...this.members[idx], ...member };
+        } else {
+            this.members.push(member);
+        }
+        this.rebuildIndex();
+        if (window.IDBStorage) {
+            await window.IDBStorage.putMember(member);
+        }
+        return member;
+    }
+
+    /**
+     * Xóa 1 thành viên đồng bộ giữa bộ nhớ RAM và IndexedDB
+     */
+    async deleteMember(id) {
+        if (!id) return false;
+        this.members = this.members.filter(m => m.id !== id);
+        this.rebuildIndex();
+        if (window.IDBStorage) {
+            await window.IDBStorage.deleteMember(id);
+        }
+        return true;
+    }
+
+    /**
+     * Lưu toàn bộ danh sách thành viên đồng bộ giữa bộ nhớ RAM và IndexedDB
+     */
+    async saveAll(membersList) {
+        if (!Array.isArray(membersList)) return false;
+        this.members = membersList;
+        this.rebuildIndex();
+        if (window.IDBStorage) {
+            await window.IDBStorage.saveAllMembers(membersList);
+        }
+        return true;
+    }
+
+    /**
      * Lấy danh sách các Chi/Nhánh có trong hệ thống
      */
     getBranches() {
@@ -291,12 +335,13 @@ class DataManager {
     }
 
     /**
-     * Tìm kiếm thành viên đa năng (Hỗ trợ cả Tiếng Việt có dấu và không dấu)
+     * Tìm kiếm thành viên đa năng (Hỗ trợ cả Tiếng Việt có dấu, không dấu và khớp từ khóa rời như "Trần Hưng Đạo")
      */
     searchMembers(query, privacyMode = false) {
         if (!query || !query.trim()) return [];
         const rawQ = query.toLowerCase().trim();
         const cleanQ = this.removeVietnameseTones(query);
+        const queryTokens = cleanQ.split(/\s+/).filter(Boolean);
 
         return this.members.filter(m => {
             const nameRaw = (m.ho_ten || "").toLowerCase();
@@ -325,7 +370,14 @@ class DataManager {
                                     bioClean.includes(cleanQ) || spouseClean.includes(cleanQ) || tombClean.includes(cleanQ) ||
                                     branchClean.includes(cleanQ) || meritClean.includes(cleanQ);
 
-            return matchAccented || matchUnaccented;
+            if (matchAccented || matchUnaccented) return true;
+
+            if (queryTokens.length > 1) {
+                const combinedIdentity = `${nameClean} ${titleClean} ${honorClean} ${branchClean}`;
+                return queryTokens.every(tok => combinedIdentity.includes(tok));
+            }
+
+            return false;
         });
     }
 

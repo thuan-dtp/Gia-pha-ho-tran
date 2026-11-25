@@ -87,6 +87,11 @@ window.switchTab = function(tabName, targetMemberId = null) {
             break;
         case "tree":
             window.classicTree.init();
+            if (targetMemberId) {
+                setTimeout(() => {
+                    if (window.classicTree) window.classicTree.focusMember(targetMemberId);
+                }, 180);
+            }
             break;
         case "family":
             window.familyChart.init(targetMemberId);
@@ -278,6 +283,7 @@ function initQuickSearch() {
 
         const rawQ = query.toLowerCase();
         const cleanQ = dm.removeVietnameseTones(query);
+        const queryTokens = cleanQ.split(/\s+/).filter(Boolean);
 
         const allMembers = dm.getAllMembers();
         const filtered = allMembers.filter(m => {
@@ -287,10 +293,19 @@ function initQuickSearch() {
             const titleClean = dm.removeVietnameseTones(m.ten_hieu || "");
             const aliasRaw = (m.danh_hieu || "").toLowerCase();
             const aliasClean = dm.removeVietnameseTones(m.danh_hieu || "");
+            const branchClean = dm.removeVietnameseTones(m.chi_nhanh || "");
 
-            return nameRaw.includes(rawQ) || nameClean.includes(cleanQ) ||
-                   titleRaw.includes(rawQ) || titleClean.includes(cleanQ) ||
-                   aliasRaw.includes(rawQ) || aliasClean.includes(cleanQ);
+            if (nameRaw.includes(rawQ) || nameClean.includes(cleanQ) ||
+                titleRaw.includes(rawQ) || titleClean.includes(cleanQ) ||
+                aliasRaw.includes(rawQ) || aliasClean.includes(cleanQ)) {
+                return true;
+            }
+
+            if (queryTokens.length > 1) {
+                const combined = `${nameClean} ${titleClean} ${aliasClean} ${branchClean}`;
+                return queryTokens.every(tok => combined.includes(tok));
+            }
+            return false;
         });
 
         // Sắp xếp: Tên khớp bắt đầu bằng từ khóa lên đầu, rồi theo đời thứ
@@ -1184,9 +1199,12 @@ window.openContributeHistoryModal = function(memberId) {
     if (!m) return;
 
     // Nếu người dùng đã đăng nhập có quyền chi nhánh tương ứng -> mở modal sửa trực tiếp
-    if (window.FamilyAuth && window.FamilyAuth.hasAccess(m.chi_nhanh)) {
-        window.openQuickEditModal(memberId);
-        return;
+    if (window.FamilyAuth && typeof window.FamilyAuth.getCurrentSession === "function") {
+        const session = window.FamilyAuth.getCurrentSession();
+        if (session && window.FamilyAuth.canModifyMember(session, m).allowed) {
+            window.openQuickEditAuth(memberId);
+            return;
+        }
     }
 
     const modal = document.getElementById("modal-contribute-history");

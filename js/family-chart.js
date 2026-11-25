@@ -204,7 +204,14 @@ class FamilyChart {
                     </div>
                     <div class="stele-row">
                         <div class="stele-label">Mộ phần / Nơi an nghỉ:</div>
-                        <div class="stele-value">${member.mo_phan || "Còn sinh thời"}</div>
+                        <div class="stele-value">
+                            ${member.mo_phan || "Còn sinh thời"}
+                            ${(!member.con_song && member.mo_phan && !member.mo_phan.includes("Còn sinh thời") && !member.mo_phan.toLowerCase().includes("chưa rõ") && !member.mo_phan.toLowerCase().includes("thất lạc")) ? `
+                                <button class="btn-gps-inline" onclick="window.openGpsMap('${(member.mo_phan || '').replace(/'/g, "\\'")}', '${member.ho_ten.replace(/'/g, "\\'")}')" title="Chỉ đường Google Maps tới nơi an nghỉ">
+                                    📍 Chỉ đường bản đồ
+                                </button>
+                            ` : ''}
+                        </div>
                     </div>
                 </div>
 

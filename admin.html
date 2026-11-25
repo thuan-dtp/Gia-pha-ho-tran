@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <title>QUẢN TRỊ GIA PHẢ HỌ TRẦN VIỆT NAM — PHÂN QUYỀN ĐA CHI</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="assets/icon_seal.svg">
+    <link rel="alternate icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="assets/icon_192.png">
+    <meta name="theme-color" content="#5b0606">
     
     <!-- CSS Modules -->
     <link rel="stylesheet" href="css/style.css">
@@ -40,6 +45,19 @@
             background: var(--paper-bg);
             color: var(--primary-red);
             margin: 18px 0;
+        }
+
+        .login-pin-input:placeholder-shown {
+            letter-spacing: 0.5px;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .login-pin-input::placeholder {
+            letter-spacing: 0.5px;
+            font-size: 15px;
+            font-weight: normal;
+            color: var(--text-muted);
         }
 
         .pin-hints-box {

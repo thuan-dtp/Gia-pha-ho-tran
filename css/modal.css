@@ -9,8 +9,8 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(4px);
+    background: rgba(14, 2, 4, 0.86);
+    backdrop-filter: blur(6px);
     z-index: 1000;
     display: none;
     align-items: center;
@@ -140,10 +140,14 @@ body.dark-candle-theme .stele-merit-block h4 {
 
 /* ================= MODAL THẮP HƯƠNG TÂM LINH ================= */
 .incense-modal-container {
-    max-width: 900px;
-    background: #1e0508;
+    max-width: 920px;
+    background: #1a0407;
     color: #f5ebd9;
     border-color: #ffd700;
+}
+
+.incense-modal-container .modal-body {
+    padding: 18px 24px 22px;
 }
 
 .incense-altar-scene {
@@ -388,6 +392,19 @@ textarea.form-control {
     background: var(--paper-bg);
     color: var(--primary-red);
     margin: 14px 0;
+}
+
+.quick-pin-display:placeholder-shown {
+    letter-spacing: 0.5px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.quick-pin-display::placeholder {
+    letter-spacing: 0.5px;
+    font-size: 15px;
+    font-weight: normal;
+    color: var(--text-muted);
 }
 
 .quick-auth-hints {

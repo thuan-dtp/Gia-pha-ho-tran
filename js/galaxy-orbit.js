@@ -41,14 +41,15 @@ class GalaxyOrbit {
             .attr("viewBox", [0, 0, width, height])
             .attr("class", "galaxy-svg");
 
-        // Filter phát sáng tinh tú (Glow filter)
+        // Filter phát sáng tinh tú (userSpaceOnUse chống lỗi mất hình trên đường/điểm 0px)
         const defs = this.svg.append("defs");
         const glow = defs.append("filter")
             .attr("id", "star-glow")
-            .attr("x", "-50%")
-            .attr("y", "-50%")
-            .attr("width", "200%")
-            .attr("height", "200%");
+            .attr("filterUnits", "userSpaceOnUse")
+            .attr("x", "-10000")
+            .attr("y", "-10000")
+            .attr("width", "30000")
+            .attr("height", "30000");
         glow.append("feGaussianBlur").attr("stdDeviation", "4").attr("result", "coloredBlur");
         const feMerge = glow.append("feMerge");
         feMerge.append("feMergeNode").attr("in", "coloredBlur");
@@ -56,28 +57,71 @@ class GalaxyOrbit {
 
         // Nhóm phóng to thu nhỏ
         const g = this.svg.append("g").attr("class", "galaxy-viewport");
+        this.g = g;
 
         this.zoom = d3.zoom()
-            .scaleExtent([0.3, 4])
+            .scaleExtent([0.1, 4])
             .on("zoom", (event) => g.attr("transform", event.transform));
 
         this.svg.call(this.zoom);
 
         // Vẽ bụi sao nền ngẫu nhiên
         const starsBg = g.append("g").attr("class", "stars-bg");
-        for (let s = 0; s < 120; s++) {
+        for (let s = 0; s < 140; s++) {
             starsBg.append("circle")
-                .attr("cx", (Math.random() - 0.5) * width * 2)
-                .attr("cy", (Math.random() - 0.5) * height * 2)
-                .attr("r", Math.random() * 1.5 + 0.5)
+                .attr("cx", (Math.random() - 0.5) * 4500 + width / 2)
+                .attr("cy", (Math.random() - 0.5) * 4500 + height / 2)
+                .attr("r", Math.random() * 1.6 + 0.5)
                 .attr("fill", "#ffffff")
                 .attr("opacity", Math.random() * 0.7 + 0.2);
         }
 
         if (this.mode === "orbit") {
             this.renderRadialOrbit(g, members, width, height);
+            this.resetZoom(false);
         } else {
             this.renderForceGraph(g, members, width, height);
+            this.svg.call(this.zoom.transform, d3.zoomIdentity.translate(width * 0.12, height * 0.12).scale(0.76));
+        }
+    }
+
+    zoomIn() {
+        if (this.svg && this.zoom) {
+            this.svg.transition().duration(300).call(this.zoom.scaleBy, 1.3);
+        }
+    }
+
+    zoomOut() {
+        if (this.svg && this.zoom) {
+            this.svg.transition().duration(300).call(this.zoom.scaleBy, 0.75);
+        }
+    }
+
+    resetZoom(animate = true) {
+        if (!this.svg || !this.zoom) return;
+        const width = this.container.clientWidth || 1000;
+        const height = this.container.clientHeight || 700;
+
+        if (this.mode === "orbit") {
+            // Khung nhìn mặc định vừa vặn các vòng quỹ đạo trung tâm, dễ đọc
+            const targetScale = width <= 768 ? 0.36 : 0.48;
+            const cx = width / 2;
+            const cy = height / 2;
+            const transform = d3.zoomIdentity
+                .translate(cx - targetScale * cx, cy - targetScale * cy)
+                .scale(targetScale);
+            if (animate) {
+                this.svg.transition().duration(500).call(this.zoom.transform, transform);
+            } else {
+                this.svg.call(this.zoom.transform, transform);
+            }
+        } else {
+            const transform = d3.zoomIdentity.translate(width * 0.12, height * 0.12).scale(0.76);
+            if (animate) {
+                this.svg.transition().duration(500).call(this.zoom.transform, transform);
+            } else {
+                this.svg.call(this.zoom.transform, transform);
+            }
         }
     }
 
@@ -202,11 +246,14 @@ class GalaxyOrbit {
             .attr("fill", "#5b0606")
             .text("TỔ");
 
-        // Tên bên cạnh ngôi sao
+        // Tên bên cạnh ngôi sao (viền tối chống chồng chữ)
         nodeElem.append("text")
             .attr("dy", d => d.radius + 14)
             .attr("text-anchor", "middle")
             .attr("fill", "#ffffff")
+            .attr("stroke", "#120305")
+            .attr("stroke-width", 3)
+            .style("paint-order", "stroke")
             .attr("font-size", "11px")
             .attr("font-weight", d => d.doi_thu <= 2 ? "bold" : "normal")
             .text(d => d.ho_ten);
@@ -228,10 +275,10 @@ class GalaxyOrbit {
         });
 
         this.simulation = d3.forceSimulation(nodes)
-            .force("link", d3.forceLink(links).id(d => d.id).distance(80))
-            .force("charge", d3.forceManyBody().strength(-240))
+            .force("link", d3.forceLink(links).id(d => d.id).distance(95))
+            .force("charge", d3.forceManyBody().strength(-320))
             .force("center", d3.forceCenter(width / 2, height / 2))
-            .force("collision", d3.forceCollide().radius(d => d.radius + 15));
+            .force("collision", d3.forceCollide().radius(d => d.radius + 26));
 
         // Vẽ đường nối
         const link = g.append("g")
@@ -239,25 +286,28 @@ class GalaxyOrbit {
             .selectAll("line")
             .data(links)
             .enter().append("line")
-            .attr("stroke", "#d4af37")
-            .attr("stroke-width", 1.5)
-            .attr("stroke-opacity", 0.5);
+            .attr("stroke", "#e6c35c")
+            .attr("stroke-width", 1.8)
+            .attr("stroke-opacity", 0.65);
 
         // Vẽ Nút Node
+        let dragMoved = false;
         const node = g.append("g")
             .attr("class", "force-nodes")
             .selectAll(".force-node")
             .data(nodes)
             .enter().append("g")
             .attr("class", "force-node")
-            .style("cursor", "grab")
+            .style("cursor", "pointer")
             .call(d3.drag()
                 .on("start", (event, d) => {
+                    dragMoved = false;
                     if (!event.active) this.simulation.alphaTarget(0.3).restart();
                     d.fx = d.x;
                     d.fy = d.y;
                 })
                 .on("drag", (event, d) => {
+                    dragMoved = true;
                     d.fx = event.x;
                     d.fy = event.y;
                 })
@@ -268,7 +318,7 @@ class GalaxyOrbit {
                 })
             )
             .on("click", (event, d) => {
-                if (window.showMemberDetailModal) {
+                if (!dragMoved && window.showMemberDetailModal) {
                     window.showMemberDetailModal(d.id);
                 }
             });
@@ -285,9 +335,12 @@ class GalaxyOrbit {
             .attr("stroke-width", 1.5);
 
         node.append("text")
-            .attr("dy", d => d.radius + 13)
+            .attr("dy", d => d.radius + 14)
             .attr("text-anchor", "middle")
             .attr("fill", "#f3e5ab")
+            .attr("stroke", "#120305")
+            .attr("stroke-width", 3)
+            .style("paint-order", "stroke")
             .attr("font-size", "11px")
             .text(d => d.ho_ten);
 

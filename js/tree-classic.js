@@ -60,25 +60,47 @@ class ClassicTree {
             .attr("viewBox", [0, 0, width, height])
             .attr("class", "tree-svg");
 
-        // Tạo filter bóng đổ và hoa văn mạ vàng cho SVG
+        // Tạo filter bóng đổ (userSpaceOnUse chống mất nét đường thẳng đứng/ngang) và gradient sơn son thiếp vàng
         const defs = this.svg.append("defs");
         const filter = defs.append("filter")
             .attr("id", "gold-glow")
-            .attr("x", "-20%")
-            .attr("y", "-20%")
-            .attr("width", "140%")
-            .attr("height", "140%");
-        filter.append("feGaussianBlur").attr("stdDeviation", "2").attr("result", "blur");
-        filter.append("feComposite").attr("in", "SourceGraphic").attr("in2", "blur").attr("operator", "over");
+            .attr("filterUnits", "userSpaceOnUse")
+            .attr("x", "-10000")
+            .attr("y", "-10000")
+            .attr("width", "30000")
+            .attr("height", "30000");
+        filter.append("feDropShadow")
+            .attr("dx", "0")
+            .attr("dy", "3")
+            .attr("stdDeviation", "3")
+            .attr("flood-color", "#000000")
+            .attr("flood-opacity", "0.45");
+
+        const gradDeceased = defs.append("linearGradient")
+            .attr("id", "card-grad-deceased")
+            .attr("x1", "0%").attr("y1", "0%")
+            .attr("x2", "100%").attr("y2", "100%");
+        gradDeceased.append("stop").attr("offset", "0%").attr("stop-color", "#6e0b0f");
+        gradDeceased.append("stop").attr("offset", "100%").attr("stop-color", "#470406");
+
+        const gradAlive = defs.append("linearGradient")
+            .attr("id", "card-grad-alive")
+            .attr("x1", "0%").attr("y1", "0%")
+            .attr("x2", "100%").attr("y2", "100%");
+        gradAlive.append("stop").attr("offset", "0%").attr("stop-color", "#8f1d22");
+        gradAlive.append("stop").attr("offset", "100%").attr("stop-color", "#5e0d10");
 
         // Nhóm chính (Group) để Zoom & Pan
         this.g = this.svg.append("g").attr("class", "tree-viewport");
 
-        // Cấu hình Zoom
+        // Cấu hình Zoom (hỗ trợ cả toàn cảnh 24 đời lẫn phóng đại chi tiết, tự giữ độ nét đường nối)
         this.zoom = d3.zoom()
-            .scaleExtent([0.2, 3])
+            .scaleExtent([0.08, 3.5])
             .on("zoom", (event) => {
                 this.g.attr("transform", event.transform);
+                const k = event.transform.k || 1;
+                const adaptiveStroke = k < 0.65 ? Math.min(5.5, 2.3 / Math.pow(k, 0.55)) : 2.3;
+                this.g.selectAll(".tree-link").attr("stroke-width", adaptiveStroke);
             });
 
         this.svg.call(this.zoom);
@@ -94,20 +116,21 @@ class ClassicTree {
             this.rootData.y0 = 60;
         }
 
-        // Cập nhật cây
-        this.update(this.rootData);
+        // Cập nhật cây lần đầu (không cần chờ animation để tính khung nhìn chuẩn xác tức thì)
+        this.update(this.rootData, true);
 
-        // Căn giữa cây sau khi vẽ
-        setTimeout(() => this.resetZoom(), 150);
+        // Định khung mặc định rõ nét ngay từ các Đời Tổ đầu tiên (tránh lỗi lệch khung & chữ li ti)
+        this.focusAncestorsView(false);
     }
 
-    update(source) {
+    update(source, instant = false) {
         const isHorizontal = this.orientation === "horizontal";
+        const transDuration = instant ? 0 : this.duration;
 
-        // Định nghĩa Tree layout
+        // Định nghĩa Tree layout thoáng đãng, cân đối
         const tree = isHorizontal
-            ? d3.tree().nodeSize([this.nodeHeight + 35, this.nodeWidth + 70])
-            : d3.tree().nodeSize([this.nodeWidth + 40, this.nodeHeight + 60]);
+            ? d3.tree().nodeSize([this.nodeHeight + 38, this.nodeWidth + 74])
+            : d3.tree().nodeSize([this.nodeWidth + 42, this.nodeHeight + 68]);
 
         tree(this.rootData);
 
@@ -117,9 +140,9 @@ class ClassicTree {
         // Chuẩn hóa khoảng cách tầng (depth)
         nodes.forEach(d => {
             if (isHorizontal) {
-                d.y = d.depth * (this.nodeWidth + 60);
+                d.y = d.depth * (this.nodeWidth + 68);
             } else {
-                d.y = d.depth * (this.nodeHeight + 65);
+                d.y = d.depth * (this.nodeHeight + 70);
             }
         });
 
@@ -130,19 +153,21 @@ class ClassicTree {
         const linkEnter = link.enter().append("path")
             .attr("class", "tree-link")
             .attr("d", d => {
+                if (instant) return this.diagonalPath(d.source, d.target, isHorizontal);
                 const o = { x: source.x0 || 0, y: source.y0 || 0 };
                 return this.diagonalPath(o, o, isHorizontal);
             })
             .attr("fill", "none")
-            .attr("stroke", "#d4af37")
-            .attr("stroke-width", 2)
-            .attr("stroke-opacity", 0.75)
-            .attr("stroke-dasharray", "4,2");
+            .attr("stroke", "#e6c35c")
+            .attr("stroke-width", 2.3)
+            .attr("stroke-opacity", 0.92)
+            .attr("stroke-linecap", "round")
+            .attr("stroke-linejoin", "round");
 
-        link.merge(linkEnter).transition().duration(this.duration)
+        link.merge(linkEnter).transition().duration(transDuration)
             .attr("d", d => this.diagonalPath(d.source, d.target, isHorizontal));
 
-        link.exit().transition().duration(this.duration)
+        link.exit().transition().duration(transDuration)
             .attr("d", d => {
                 const o = { x: source.x, y: source.y };
                 return this.diagonalPath(o, o, isHorizontal);
@@ -157,7 +182,10 @@ class ClassicTree {
             .attr("class", d => `tree-node ${d.data.gioi_tinh === 'Nữ' ? 'node-female' : 'node-male'} ${d.data.con_song ? 'node-alive' : 'node-deceased'}`)
             .attr("id", d => `tree-node-${d.data.id}`)
             .attr("data-id", d => d.data.id)
-            .attr("transform", d => isHorizontal ? `translate(${source.y0},${source.x0})` : `translate(${source.x0},${source.y0})`)
+            .attr("transform", d => {
+                if (instant) return isHorizontal ? `translate(${d.y},${d.x})` : `translate(${d.x},${d.y})`;
+                return isHorizontal ? `translate(${source.y0},${source.x0})` : `translate(${source.x0},${source.y0})`;
+            })
             .on("click", (event, d) => {
                 // Nhấp vào thẻ bài để xem chi tiết
                 if (window.showMemberDetailModal) {
@@ -174,7 +202,7 @@ class ClassicTree {
             .attr("height", this.nodeHeight)
             .attr("rx", 6)
             .attr("ry", 6)
-            .attr("fill", d => d.data.con_song ? "#7f1d1d" : "#5b0606")
+            .attr("fill", d => d.data.con_song ? "url(#card-grad-alive)" : "url(#card-grad-deceased)")
             .attr("stroke", "#d4af37")
             .attr("stroke-width", 2)
             .attr("filter", "url(#gold-glow)");
@@ -309,14 +337,14 @@ class ClassicTree {
             .text(d => d.children ? "−" : "+");
 
         // Hiệu ứng Transition Node
-        const nodeUpdate = node.merge(nodeEnter).transition().duration(this.duration)
+        const nodeUpdate = node.merge(nodeEnter).transition().duration(transDuration)
             .attr("transform", d => isHorizontal ? `translate(${d.y},${d.x})` : `translate(${d.x},${d.y})`);
 
         nodeUpdate.select(".collapse-btn text")
             .text(d => d.children ? "−" : "+");
 
         // Node Exit
-        const nodeExit = node.exit().transition().duration(this.duration)
+        const nodeExit = node.exit().transition().duration(transDuration)
             .attr("transform", d => isHorizontal ? `translate(${source.y},${source.x})` : `translate(${source.x},${source.y})`)
             .remove();
 
@@ -328,19 +356,25 @@ class ClassicTree {
     }
 
     /**
-     * Tạo đường cong Bezier mềm mại kết nối các thế hệ
+     * Tạo đường cong Bezier mềm mại kết nối mép thẻ giữa các thế hệ
+     * Bổ sung độ lệch vi mô (0.05px) khi cha-con thẳng hàng 100% để tránh lỗi SVG width=0 / height=0
      */
     diagonalPath(s, d, isHorizontal) {
+        const sameNode = (s.x === d.x && s.y === d.y);
         if (isHorizontal) {
-            return `M ${s.y} ${s.x}
-                    C ${(s.y + d.y) / 2} ${s.x},
-                      ${(s.y + d.y) / 2} ${d.x},
-                      ${d.y} ${d.x}`;
+            const sy = sameNode ? s.y : s.y + this.nodeWidth / 2;
+            const dy = sameNode ? d.y + 0.05 : d.y - this.nodeWidth / 2;
+            const sx = s.x;
+            const dx = Math.abs(d.x - s.x) < 0.1 ? d.x + 0.05 : d.x;
+            const midY = (sy + dy) / 2;
+            return `M ${sy} ${sx} C ${midY} ${sx}, ${midY} ${dx}, ${dy} ${dx}`;
         } else {
-            return `M ${s.x} ${s.y}
-                    C ${s.x} ${(s.y + d.y) / 2},
-                      ${d.x} ${(s.y + d.y) / 2},
-                      ${d.x} ${d.y}`;
+            const sy = sameNode ? s.y : s.y + this.nodeHeight / 2;
+            const dy = sameNode ? d.y + 0.05 : d.y - this.nodeHeight / 2;
+            const sx = s.x;
+            const dx = Math.abs(d.x - s.x) < 0.1 ? d.x + 0.05 : d.x;
+            const midY = (sy + dy) / 2;
+            return `M ${sx} ${sy} C ${sx} ${midY}, ${dx} ${midY}, ${dx} ${dy}`;
         }
     }
 
@@ -357,21 +391,77 @@ class ClassicTree {
         }
     }
 
+    /**
+     * Tính toán khung bao toán học trực tiếp từ tọa độ D3 (chính xác 100%, không phụ thuộc animation DOM)
+     */
+    computeNodesBounds(targetNodes) {
+        if (!targetNodes || targetNodes.length === 0) return null;
+        const isHorizontal = this.orientation === "horizontal";
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+
+        targetNodes.forEach(d => {
+            const px = isHorizontal ? d.y : d.x;
+            const py = isHorizontal ? d.x : d.y;
+            if (px - this.nodeWidth / 2 < minX) minX = px - this.nodeWidth / 2;
+            if (px + this.nodeWidth / 2 > maxX) maxX = px + this.nodeWidth / 2;
+            if (py - this.nodeHeight / 2 < minY) minY = py - this.nodeHeight / 2;
+            if (py + this.nodeHeight / 2 > maxY) maxY = py + this.nodeHeight / 2;
+        });
+
+        return {
+            x: minX,
+            y: minY,
+            width: Math.max(1, maxX - minX),
+            height: Math.max(1, maxY - minY)
+        };
+    }
+
+    /**
+     * Định vị góc nhìn rõ nét tập trung vào Đức Thủy Tổ & các Đời đầu khi mới mở trang
+     */
+    focusAncestorsView(animate = true) {
+        if (!this.svg || !this.rootData || !this.zoom) return;
+        const width = this.container.clientWidth || 1000;
+        const height = this.container.clientHeight || 700;
+        const isMobile = width <= 768;
+
+        const allNodes = this.rootData.descendants();
+        const maxInitDepth = isMobile ? 3 : 5;
+        const initNodes = allNodes.filter(d => d.depth <= maxInitDepth);
+        const bounds = this.computeNodesBounds(initNodes.length > 0 ? initNodes : allNodes);
+        if (!bounds) return;
+
+        const midX = bounds.x + bounds.width / 2;
+        const midY = bounds.y + bounds.height / 2;
+        const rawScale = 0.88 / Math.max(bounds.width / width, bounds.height / height);
+        const scale = Math.max(isMobile ? 0.52 : 0.62, Math.min(1.05, rawScale));
+
+        const transform = d3.zoomIdentity
+            .translate(width / 2 - scale * midX, height / 2 - scale * midY)
+            .scale(scale);
+
+        if (animate) {
+            this.svg.transition().duration(550).call(this.zoom.transform, transform);
+        } else {
+            this.svg.call(this.zoom.transform, transform);
+        }
+    }
+
+    /**
+     * Căn giữa toàn cảnh toàn bộ cây phả hệ trong màn hình
+     */
     resetZoom() {
-        if (!this.svg || !this.g || !this.zoom) return;
+        if (!this.svg || !this.rootData || !this.zoom) return;
         const width = this.container.clientWidth || 1000;
         const height = this.container.clientHeight || 700;
 
-        const bounds = this.g.node().getBBox();
-        const fullWidth = bounds.width;
-        const fullHeight = bounds.height;
+        const bounds = this.computeNodesBounds(this.rootData.descendants());
+        if (!bounds || bounds.width === 0 || bounds.height === 0) return;
 
-        if (fullWidth === 0 || fullHeight === 0) return;
+        const midX = bounds.x + bounds.width / 2;
+        const midY = bounds.y + bounds.height / 2;
 
-        const midX = bounds.x + fullWidth / 2;
-        const midY = bounds.y + fullHeight / 2;
-
-        const scale = 0.85 / Math.max(fullWidth / width, fullHeight / height);
+        const scale = Math.max(0.1, Math.min(1.15, 0.88 / Math.max(bounds.width / width, bounds.height / height)));
         const transform = d3.zoomIdentity
             .translate(width / 2 - scale * midX, height / 2 - scale * midY)
             .scale(scale);

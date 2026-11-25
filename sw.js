@@ -3,13 +3,17 @@
  * Lưu trữ và phục vụ toàn bộ ứng dụng khi thiết bị không có mạng Internet.
  */
 
-const CACHE_NAME = "giapha-hotran-v6.0.2-mobile-responsive-fix";
+const CACHE_NAME = "giapha-hotran-v6.1.0-royal-audit-upgrade";
 
 const ASSETS_TO_CACHE = [
     "./",
     "./index.html",
     "./admin.html",
     "./manifest.json",
+    "./favicon.ico",
+    "./assets/icon_seal.svg",
+    "./assets/icon_192.png",
+    "./assets/icon_512.png",
     "./css/style.css",
     "./css/styles.css",
     "./css/modal.css",

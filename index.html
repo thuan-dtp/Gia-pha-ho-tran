@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <title>GIA PHẢ HỌ TRẦN VIỆT NAM — Tinh Hoa Truyền Thừa & Kết Nối Các Chi Phái</title>
     
-    <!-- PWA Web App Manifest -->
+    <!-- PWA Web App Manifest & Icons -->
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="assets/icon_seal.svg">
+    <link rel="alternate icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="assets/icon_192.png">
     <meta name="theme-color" content="#5b0606">
     <meta name="description" content="GIA PHẢ HỌ TRẦN VIỆT NAM — Ứng dụng gia phả số đa nhánh hoạt động 100% ngoại tuyến, kết nối các chi họ Trần toàn quốc.">
 
@@ -160,7 +163,8 @@
                     <div class="tree-control-group">
                         <button class="btn-royal-sm-outline" onclick="window.classicTree.zoomIn()" title="Phóng to">🔍 +</button>
                         <button class="btn-royal-sm-outline" onclick="window.classicTree.zoomOut()" title="Thu nhỏ">🔍 −</button>
-                        <button class="btn-royal-sm-outline" onclick="window.classicTree.resetZoom()" title="Căn giữa màn hình">🎯 Căn Giữa</button>
+                        <button class="btn-royal-sm-outline" onclick="window.classicTree.focusAncestorsView(true)" title="Định vị rõ nét về Đức Thủy Tổ và các đời đầu">👑 Về Thủy Tổ</button>
+                        <button class="btn-royal-sm-outline" onclick="window.classicTree.resetZoom()" title="Căn giữa toàn cảnh 24 đời">🎯 Căn Giữa</button>
                         <button class="btn-royal-sm" onclick="window.classicTree.exportHighResImage()" title="Tải ảnh PNG độ nét cao để in ấn">🖼️ Xuất Ảnh In Ấn</button>
                     </div>
                 </div>
@@ -180,10 +184,17 @@
         <div class="tab-pane" id="pane-galaxy">
             <div class="galaxy-wrapper">
                 <div class="galaxy-control-bar">
-                    <button class="btn-royal-sm" onclick="window.galaxyOrbit.setMode('orbit')">🪐 Quỹ Đạo Đồng Tâm</button>
-                    <button class="btn-royal-sm" onclick="window.galaxyOrbit.setMode('force')">⚡ Mạng Lưới Trọng Lực Kéo Thả</button>
+                    <div class="tree-control-group">
+                        <button class="btn-royal-sm" onclick="window.galaxyOrbit.setMode('orbit')">🪐 Quỹ Đạo Đồng Tâm</button>
+                        <button class="btn-royal-sm" onclick="window.galaxyOrbit.setMode('force')">⚡ Mạng Lưới Trọng Lực Kéo Thả</button>
+                    </div>
+                    <div class="tree-control-group">
+                        <button class="btn-royal-sm-outline" onclick="window.galaxyOrbit.zoomIn()" title="Phóng to">🔍 +</button>
+                        <button class="btn-royal-sm-outline" onclick="window.galaxyOrbit.zoomOut()" title="Thu nhỏ">🔍 −</button>
+                        <button class="btn-royal-sm-outline" onclick="window.galaxyOrbit.resetZoom(true)" title="Căn giữa ngân hà">🎯 Căn Giữa</button>
+                    </div>
                 </div>
-                <div id="galaxy-container" style="width: 100%; height: 100%;"></div>
+                <div id="galaxy-container" class="galaxy-viewport-area"></div>
             </div>
         </div>
 
@@ -641,7 +652,7 @@
     </div>
 
     <!-- TOAST THÔNG BÁO NHANH TRÊN TRANG CHÍNH -->
-    <div id="index-toast" class="admin-toast">
+    <div id="index-toast" class="admin-toast" style="display: none;">
         <span id="index-toast-icon">✅</span>
         <span id="index-toast-message">Đã lưu thay đổi thành công!</span>
     </div>

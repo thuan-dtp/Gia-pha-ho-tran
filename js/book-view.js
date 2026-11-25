@@ -62,7 +62,7 @@ class BookView {
                 </aside>
 
                 <!-- NỘI DUNG TRANG SÁCH PHẢ -->
-                <main class="book-pages-wrapper">
+                <div class="book-pages-wrapper">
                     <!-- TRANG BÌA & LỜI TỰA ĐẠI TỘC -->
                     <article class="book-page book-cover" id="book-preface">
                         <div class="book-cover-border">
@@ -232,7 +232,7 @@ class BookView {
                             </div>
                         </div>
                     </article>
-                </main>
+                </div>
             </div>
         `;
 
