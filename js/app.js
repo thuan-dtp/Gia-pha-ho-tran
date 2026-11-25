@@ -625,9 +625,9 @@ window.showMemberDetailModal = function(memberId) {
                     </div>
                     <div class="member-tts-speed">
                         <span class="speed-label">Tốc độ:</span>
-                        <button type="button" class="btn-tts-speed ${window.ttsAssistant && window.ttsAssistant.rate <= 0.8 ? 'active' : ''}" onclick="window.ttsSetRate(0.75, this)" title="Đọc chậm">🐢 Chậm</button>
-                        <button type="button" class="btn-tts-speed ${!window.ttsAssistant || (window.ttsAssistant.rate > 0.8 && window.ttsAssistant.rate < 1.15) ? 'active' : ''}" onclick="window.ttsSetRate(0.95, this)" title="Đọc vừa chuẩn">🚶 Vừa</button>
-                        <button type="button" class="btn-tts-speed ${window.ttsAssistant && window.ttsAssistant.rate >= 1.15 ? 'active' : ''}" onclick="window.ttsSetRate(1.2, this)" title="Đọc nhanh">⚡ Nhanh</button>
+                        <button type="button" class="btn-tts-speed ${window.ttsAssistant && window.ttsAssistant.rate <= 0.84 ? 'active' : ''}" onclick="window.ttsSetRate(0.78, this)" title="Đọc chậm trang trọng (0.78x)">🐢 Chậm</button>
+                        <button type="button" class="btn-tts-speed ${!window.ttsAssistant || (window.ttsAssistant.rate > 0.84 && window.ttsAssistant.rate < 1.02) ? 'active' : ''}" onclick="window.ttsSetRate(0.92, this)" title="Đọc vừa chuẩn (0.92x)">🚶 Vừa</button>
+                        <button type="button" class="btn-tts-speed ${window.ttsAssistant && window.ttsAssistant.rate >= 1.02 ? 'active' : ''}" onclick="window.ttsSetRate(1.08, this)" title="Đọc nhanh (1.08x)">⚡ Nhanh</button>
                     </div>
                 </div>
             </div>
