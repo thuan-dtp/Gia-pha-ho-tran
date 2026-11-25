@@ -25,12 +25,13 @@ class TTSAssistant {
             if (typeof this.synth.addEventListener === 'function') {
                 this.synth.addEventListener('voiceschanged', () => this.initVoice());
             }
-            // Quét định kỳ lúc mới mở trang để bắt ngay giọng vi-VN khi trình duyệt nạp chậm
+            // Quét định kỳ để bắt ngay giọng Nữ Tiếng Việt Online (HoaiMy / Google Tiếng Việt / Linh) khi trình duyệt nạp bất đồng bộ
             let tries = 0;
             const timer = setInterval(() => {
                 tries++;
                 this.initVoice();
-                if (this.voice || tries >= 12) {
+                const hasPreferredFemale = this.voice && /hoaimy|hoài my|google|linh/i.test(this.voice.name || '');
+                if (hasPreferredFemale || tries >= 16) {
                     clearInterval(timer);
                 }
             }, 250);
@@ -38,23 +39,25 @@ class TTSAssistant {
     }
 
     /**
-     * Lọc và khóa cứng giọng đọc Nữ Tiếng Việt Nam (vi-VN) chuẩn tự nhiên nhất
+     * Lọc và ưu tiên chọn giọng Nữ Tiếng Việt Nam (vi-VN) tự nhiên chuẩn nhất
+     * Loại trừ hoàn toàn giọng tiếng Anh mặc định
      */
     getVietnameseVoice() {
         if (!this.synth) return null;
         const voices = this.synth.getVoices() || [];
         if (!voices || voices.length === 0) return null;
 
-        // Lọc các giọng thuộc ngôn ngữ Tiếng Việt (vi-VN / vi_VN / vi)
+        // Chỉ giữ các giọng Tiếng Việt thực sự (loại trừ hoàn toàn en-US / en-GB / David / Zira / Mark)
         const viVoices = voices.filter(v => {
-            const lang = (v.lang || '').toLowerCase();
+            const langNorm = (v.lang || '').toLowerCase().replace('_', '-');
             const name = (v.name || '').toLowerCase();
+            if (langNorm.startsWith('en-') || /david|zira|mark|hazel|george|susan/.test(name)) {
+                return false;
+            }
             return (
-                lang === 'vi-vn' ||
-                lang === 'vi_vn' ||
-                lang.startsWith('vi-') ||
-                lang.startsWith('vi_') ||
-                lang === 'vi' ||
+                langNorm === 'vi-vn' ||
+                langNorm === 'vi' ||
+                langNorm.startsWith('vi-') ||
                 name.includes('tiếng việt') ||
                 name.includes('tieng viet') ||
                 name.includes('vietnamese') ||
@@ -64,17 +67,18 @@ class TTSAssistant {
         });
 
         if (viVoices.length === 0) {
-            // TUYỆT ĐỐI không gán voices[0] để không bao giờ bị rơi về giọng tiếng Anh mặc định (David/Zira)
             return null;
         }
 
-        // 1. Ưu tiên cao nhất: Giọng Nữ Tiếng Việt tự nhiên (Google Tiếng Việt, Microsoft HoaiMy, Linh)
+        // 1. Ưu tiên cao nhất: Giọng Nữ Tiếng Việt tự nhiên (Microsoft HoaiMy, Google Tiếng Việt, Linh)
+        const hoaiMyOnline = viVoices.find(v => /hoaimy|hoài my/i.test(v.name || '') && /online|natural/i.test(v.name || ''));
+        if (hoaiMyOnline) return hoaiMyOnline;
+
         const femalePriority = [
-            'google tiếng việt',
-            'google vietnamese',
-            'microsoft hoaimy online',
             'hoaimy',
             'hoài my',
+            'google tiếng việt',
+            'google vietnamese',
             'linh'
         ];
 
@@ -83,28 +87,21 @@ class TTSAssistant {
             if (found) return found;
         }
 
-        // 2. Ưu tiên giọng Nữ hoặc giọng chuẩn mang mã vi-VN / vi_VN
+        // 2. Ưu tiên giọng Nữ chuẩn mang mã vi-VN
         const femaleViVn = viVoices.find(v => {
-            const lang = (v.lang || '').toLowerCase();
             const name = (v.name || '').toLowerCase();
-            const isViVn = (lang === 'vi-vn' || lang === 'vi_vn');
-            const isFemale = name.includes('female') || name.includes('nữ');
-            return isViVn && isFemale;
+            return name.includes('female') || name.includes('nữ') || name.includes('google');
         });
         if (femaleViVn) return femaleViVn;
 
-        // 3. Bất kỳ giọng chuẩn vi-VN / vi_VN nào của trình duyệt (ưu tiên giọng Google / Nữ tự nhiên)
-        const googleAnyVi = viVoices.find(v => (v.name || '').toLowerCase().includes('google'));
-        if (googleAnyVi) return googleAnyVi;
-
+        // 3. Giọng chuẩn vi-VN tự nhiên của hệ thống
         const standardViVn = viVoices.find(v => {
-            const lang = (v.lang || '').toLowerCase();
-            const name = (v.name || '').toLowerCase();
-            return (lang === 'vi-vn' || lang === 'vi_vn') && !name.includes('male');
+            const stripped = (v.name || '').replace(/việt\s*nam|viet\s*nam|vietnamese/gi, ' ');
+            return !/\bmale\b|\ban\b/i.test(stripped);
         });
         if (standardViVn) return standardViVn;
 
-        // 4. Dự phòng giọng vi-VN bất kỳ có trên máy
+        // 4. Dự phòng giọng vi-VN có trên trình duyệt
         return viVoices[0];
     }
 
@@ -113,23 +110,8 @@ class TTSAssistant {
         const viVoice = this.getVietnameseVoice();
         if (viVoice) {
             this.voice = viVoice;
-            console.log("TTS Assistant: Đã khóa cứng giọng đọc tiếng Việt:", viVoice.name, `(${viVoice.lang})`);
         } else {
             this.voice = null;
-        }
-    }
-
-    /**
-     * Thông báo thân thiện khi hệ điều hành máy tính chưa cài sẵn giọng đọc tiếng Việt
-     */
-    showDefaultVoiceNotice() {
-        const msg = "Trình duyệt đang dùng giọng mặc định, khuyên dùng Microsoft Edge hoặc Chrome có kết nối mạng để nghe giọng Tiếng Việt Nam chuẩn nhất.";
-        if (window.showIndexToast) {
-            window.showIndexToast(msg, false);
-        } else if (window.showAdminToast) {
-            window.showAdminToast(msg, false);
-        } else {
-            console.warn(msg);
         }
     }
 
@@ -186,23 +168,19 @@ class TTSAssistant {
         const startSpeaking = () => {
             if (!this.isPlaying) return;
             const viVoice = this.getVietnameseVoice();
-            if (viVoice) {
-                this.voice = viVoice;
-            } else {
-                this.voice = null;
-                this.showDefaultVoiceNotice();
-            }
+            this.voice = viVoice || null;
             this.speakNextChunk();
         };
 
-        // Nếu trình duyệt vừa mở trang đang nạp danh sách getVoices() bất đồng bộ, chờ tối đa 400ms để bắt trúng giọng vi-VN
-        const initialVoices = this.synth.getVoices() || [];
-        if (initialVoices.length === 0) {
+        // Chờ ngắn tối đa 600ms nếu trình duyệt vừa mở trang đang nạp giọng Nữ Tiếng Việt bất đồng bộ
+        const currentVi = this.getVietnameseVoice();
+        const hasNaturalFemale = currentVi && /hoaimy|hoài my|google|linh/i.test(currentVi.name || '');
+        if (!hasNaturalFemale) {
             let waited = 0;
             const waitVoices = setInterval(() => {
                 waited += 50;
-                const loaded = this.synth.getVoices() || [];
-                if (loaded.length > 0 || waited >= 400) {
+                const v = this.getVietnameseVoice();
+                if ((v && /hoaimy|hoài my|google|linh/i.test(v.name || '')) || waited >= 600) {
                     clearInterval(waitVoices);
                     startSpeaking();
                 }
@@ -223,18 +201,15 @@ class TTSAssistant {
         const sentence = this.currentChunks[this.chunkIndex];
         const utter = new SpeechSynthesisUtterance(sentence);
 
-        // Bắt buộc gán utterance.lang = 'vi-VN' cho mọi đoạn đọc
+        // Khóa cứng ngôn ngữ vi-VN và pitch = 1.0 trên mọi đoạn đọc (kể cả khi trình duyệt dùng giọng mặc định)
         utter.lang = 'vi-VN';
         utter.rate = this.rate;
         utter.pitch = 1.0;
 
-        // Bắt buộc gọi getVoices() và gán thẳng utterance.voice vào giọng Tiếng Việt Nam chuẩn
         const currentViVoice = this.getVietnameseVoice() || this.voice;
         if (currentViVoice) {
             this.voice = currentViVoice;
             utter.voice = currentViVoice;
-        } else {
-            // Không gán utter.voice để trình duyệt nhận diện theo utter.lang = 'vi-VN'
         }
 
         utter.onend = () => {
@@ -245,7 +220,8 @@ class TTSAssistant {
         };
 
         utter.onerror = (e) => {
-            console.warn("TTS chunk warning:", e);
+            const errType = e && e.error ? String(e.error).toLowerCase() : '';
+            if (errType === 'canceled' || errType === 'interrupted') return;
             if (this.isPlaying && !this.isPaused) {
                 this.chunkIndex++;
                 this.speakNextChunk();

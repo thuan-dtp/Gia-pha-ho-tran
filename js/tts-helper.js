@@ -1,7 +1,6 @@
 /**
  * GIA PHẢ HỌ TRẦN - TTS HELPER
- * Trợ lý điều khiển giọng đọc Nữ Tiếng Việt Nam chuẩn (vi-VN)
- * Khóa cứng ngôn ngữ đọc vi-VN, ưu tiên các giọng Nữ chuẩn: Google Tiếng Việt, Microsoft HoaiMy, Linh.
+ * Bộ xử lý Trợ lý Giọng đọc Nữ Tiếng Việt Nam chuẩn (vi-VN) theo cấu hình SKILL.md
  */
 
 window.ttsHelper = {
@@ -12,12 +11,15 @@ window.ttsHelper = {
         if (!window.speechSynthesis) return null;
         const voices = window.speechSynthesis.getVoices() || [];
         const viVoices = voices.filter(v => {
-            const lang = (v.lang || '').toLowerCase();
+            const langNorm = (v.lang || '').toLowerCase().replace('_', '-');
             const name = (v.name || '').toLowerCase();
+            if (langNorm.startsWith('en-') || /david|zira|mark|hazel|george|susan/.test(name)) {
+                return false;
+            }
             return (
-                lang === 'vi-vn' ||
-                lang === 'vi_vn' ||
-                lang.startsWith('vi') ||
+                langNorm === 'vi-vn' ||
+                langNorm === 'vi' ||
+                langNorm.startsWith('vi-') ||
                 name.includes('tiếng việt') ||
                 name.includes('tieng viet') ||
                 name.includes('vietnamese') ||
@@ -26,7 +28,7 @@ window.ttsHelper = {
         });
         if (!viVoices.length) return null;
 
-        const priorityKeywords = ['google tiếng việt', 'google vietnamese', 'hoaimy', 'hoài my', 'linh', 'tiếng việt', 'vietnamese'];
+        const priorityKeywords = ['hoaimy', 'hoài my', 'google tiếng việt', 'google vietnamese', 'linh', 'tiếng việt', 'vietnamese'];
         for (const kw of priorityKeywords) {
             const match = viVoices.find(v => (v.name || '').toLowerCase().includes(kw));
             if (match) return match;

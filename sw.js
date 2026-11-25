@@ -3,7 +3,7 @@
  * Luôn ưu tiên lấy bản mới nhất khi có mạng và phục vụ Offline 100% khi mất mạng.
  */
 
-const CACHE_NAME = "giapha-hotran-v6.3.0-original-vi-voice";
+const CACHE_NAME = "giapha-hotran-vi-female-v8";
 
 const ASSETS_TO_CACHE = [
     "./",
