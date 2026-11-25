@@ -1,9 +1,9 @@
 /**
- * TRỢ LÝ GIỌNG ĐỌC TIẾNG VIỆT NAM MIỀN BẮC TRẦM ẤM (TEXT-TO-SPEECH) CHO NGƯỜI CAO TUỔI
- * - Ưu tiên giọng nam miền Bắc chuẩn: Microsoft NamMinh Online -> NamMinh / An / Male / Nam
- * - Hạ cao độ trầm ấm tự nhiên (pitch = 0.88 cho giọng nam; 0.82 cho giọng trung tính/nữ trên di động)
- * - Nhịp đọc trang trọng: Chậm (0.78) | Vừa (0.92) | Nhanh (1.08)
- * - Tách câu ngắn theo dấu chấm, chấm phẩy, xuống dòng; chống cắt ngang câu và chống kẹt nút điều khiển.
+ * TRỢ LÝ GIỌNG ĐỌC NỮ TIẾNG VIỆT NAM CHUẨN (vi-VN) CHO NGƯỜI CAO TUỔI
+ * - Khóa cứng ngôn ngữ vi-VN
+ * - Ưu tiên giọng Nữ Tiếng Việt tự nhiên: Microsoft HoaiMy Online / HoaiMy -> Linh -> Google Tiếng Việt -> vi-VN
+ * - Cao độ chuẩn tự nhiên pitch = 1.0; Tốc độ: Chậm (0.85) | Vừa (1.0) | Nhanh (1.2)
+ * - Tách câu ngắn tự nhiên, chống cắt ngang câu và chống kẹt nút Tạm dừng / Tiếp tục / Dừng.
  */
 
 class TTSAssistant {
@@ -11,9 +11,8 @@ class TTSAssistant {
         this.synth = window.speechSynthesis || null;
         this.utterance = null;
         this.voice = null;
-        this.isMaleVoice = false;
-        this.pitch = 0.88; // Cao độ nam trầm ấm, trang trọng
-        this.rate = 0.92;  // Mặc định mức "Vừa" (0.92) rõ ràng, khoan thai cho người cao tuổi
+        this.pitch = 1.0; // Cao độ chuẩn tự nhiên cho giọng Nữ Tiếng Việt
+        this.rate = 1.0;  // Mặc định mức "Vừa" (1.0), Chậm (0.85), Nhanh (1.2)
         this.isPlaying = false;
         this.isPaused = false;
         this.currentTitle = "";
@@ -27,7 +26,7 @@ class TTSAssistant {
 
         this.initVoice();
         if (this.synth) {
-            // Lắng nghe đầy đủ sự kiện onvoiceschanged
+            // Lắng nghe đầy đủ sự kiện onvoiceschanged để không bao giờ rơi về giọng tiếng Anh
             this.synth.onvoiceschanged = () => this.initVoice();
             if (typeof this.synth.addEventListener === "function") {
                 this.synth.addEventListener("voiceschanged", () => this.initVoice());
@@ -38,7 +37,7 @@ class TTSAssistant {
     }
 
     /**
-     * Kiểm tra lặp 300ms (tối đa 10 lần) để bắt kịp giọng Online nạp bất đồng bộ
+     * Kiểm tra lặp 300ms (tối đa 10 lần) để bắt kịp giọng Nữ Online nạp bất đồng bộ
      */
     startVoicePolling() {
         if (!this.synth) return;
@@ -48,8 +47,8 @@ class TTSAssistant {
         this._voicePollTimer = setInterval(() => {
             this._voicePollCount++;
             this.initVoice();
-            const isTopNamMinh = this.voice && /nam\s*minh/i.test(this.voice.name || "") && /online/i.test(this.voice.name || "");
-            if (isTopNamMinh || this._voicePollCount >= 10) {
+            const isTopHoaiMy = this.voice && /hoai\s*my|hoài\s*my/i.test(this.voice.name || "") && /online/i.test(this.voice.name || "");
+            if (isTopHoaiMy || this._voicePollCount >= 10) {
                 clearInterval(this._voicePollTimer);
                 this._voicePollTimer = null;
             }
@@ -57,13 +56,13 @@ class TTSAssistant {
     }
 
     /**
-     * Phân tích và chọn giọng nam Tiếng Việt miền Bắc trầm ấm chuẩn nhất
-     * Trả về { voice, isMale, pitch }
+     * Lọc và ưu tiên chọn giọng NỮ Tiếng Việt Nam (vi-VN) tự nhiên nhất
+     * Loại bỏ ưu tiên giọng Nam (NamMinh, male)
      */
     selectVietnameseVoiceProfile() {
-        if (!this.synth) return { voice: null, isMale: false, pitch: 0.84 };
+        if (!this.synth) return { voice: null, pitch: 1.0 };
         const voices = this.synth.getVoices() || [];
-        if (!voices || voices.length === 0) return { voice: null, isMale: false, pitch: 0.84 };
+        if (!voices || voices.length === 0) return { voice: null, pitch: 1.0 };
 
         // Lọc toàn bộ danh sách giọng Tiếng Việt (vi-VN / vi_VN / Vietnamese)
         const viVoices = voices.filter(v => {
@@ -77,97 +76,83 @@ class TTSAssistant {
                 name.includes("vietnam") ||
                 name.includes("tiếng việt") ||
                 name.includes("tieng viet") ||
-                name.includes("namminh") ||
-                name.includes("nam minh") ||
                 name.includes("hoaimy") ||
-                name.includes("hoài my")
+                name.includes("hoài my") ||
+                name.includes("namminh")
             );
         });
 
         if (viVoices.length === 0) {
-            return { voice: null, isMale: false, pitch: 0.84 };
+            // Tuyệt đối không chọn voices[0] tiếng Anh
+            return { voice: null, pitch: 1.0 };
         }
 
-        const isFemaleName = (rawName) => {
+        const isMaleName = (rawName) => {
+            const stripped = (rawName || "").replace(/việt\s*nam|viet\s*nam|vietnamese/gi, " ");
+            return /namminh|nam\s*minh|\bmale\b|giọng\s*nam|giong\s*nam|\ban\b|\bnam\b/i.test(stripped);
+        };
+
+        const isExplicitFemale = (rawName) => {
             const name = (rawName || "").toLowerCase();
             return /hoaimy|hoài\s*my|\blinh\b|female|\bnữ\b|\bnu\b|giọng\s*nữ|giong\s*nu/i.test(name);
         };
 
-        const isMaleName = (rawName) => {
-            // Loại chữ "Vietnam / Việt Nam" trước khi dò từ khóa "Nam" độc lập
-            const stripped = (rawName || "").replace(/việt\s*nam|viet\s*nam|vietnamese/gi, " ");
-            return /namminh|nam\s*minh|\ban\b|\bmale\b|giọng\s*nam|giong\s*nam|\bnam\b/i.test(stripped);
-        };
-
-        // 1. Ưu tiên số 1: Microsoft NamMinh Online (giọng nam miền Bắc tự nhiên nhất trên Windows/Edge)
-        const msNamMinhOnline = viVoices.find(v => {
+        // 1. Ưu tiên số 1: Microsoft HoaiMy Online (giọng Nữ Tiếng Việt tự nhiên nhất trên Edge/Windows)
+        const msHoaiMyOnline = viVoices.find(v => {
             const n = v.name || "";
-            return /microsoft/i.test(n) && /nam\s*minh/i.test(n) && /online/i.test(n);
-        }) || viVoices.find(v => {
-            const n = v.name || "";
-            return /nam\s*minh/i.test(n) && /online/i.test(n);
+            return /hoai\s*my|hoài\s*my/i.test(n) && /online/i.test(n);
         });
-
-        if (msNamMinhOnline) {
-            return { voice: msNamMinhOnline, isMale: true, pitch: 0.88 };
+        if (msHoaiMyOnline) {
+            return { voice: msHoaiMyOnline, pitch: 1.0 };
         }
 
-        // 2. Ưu tiên số 2: Các giọng nam Tiếng Việt khác (NamMinh, Nam Minh, An, Male, Nam) — loại trừ giọng nữ
-        const namMinhAny = viVoices.find(v => /nam\s*minh/i.test(v.name || "") && !isFemaleName(v.name));
-        if (namMinhAny) {
-            return { voice: namMinhAny, isMale: true, pitch: 0.88 };
+        // 2. Ưu tiên số 2: Microsoft HoaiMy / Linh hoặc các giọng Nữ Tiếng Việt khác
+        const hoaiMyOrLinh = viVoices.find(v => isExplicitFemale(v.name) && !isMaleName(v.name));
+        if (hoaiMyOrLinh) {
+            return { voice: hoaiMyOrLinh, pitch: 1.0 };
         }
 
-        const otherMaleVi = viVoices.find(v => isMaleName(v.name) && !isFemaleName(v.name));
-        if (otherMaleVi) {
-            return { voice: otherMaleVi, isMale: true, pitch: 0.88 };
-        }
-
-        // 3. Ưu tiên số 3: Trên Android/iOS hoặc trình duyệt chỉ có Google Tiếng Việt / vi-VN mặc định
-        // -> Tự động chọn giọng vi-VN đó và hạ pitch xuống 0.82 - 0.84 để tạo âm sắc nam trầm ấm
-        const googleVi = viVoices.find(v => /google/i.test(v.name || "") && !isFemaleName(v.name));
+        // 3. Ưu tiên số 3: Google Tiếng Việt / Google Vietnamese (giọng nữ tự nhiên chuẩn trên Chrome/Android)
+        const googleVi = viVoices.find(v => /google/i.test(v.name || "") && !isMaleName(v.name));
         if (googleVi) {
-            return { voice: googleVi, isMale: false, pitch: 0.83 };
+            return { voice: googleVi, pitch: 1.0 };
         }
 
-        const neutralVi = viVoices.find(v => !isFemaleName(v.name));
-        if (neutralVi) {
-            return { voice: neutralVi, isMale: false, pitch: 0.83 };
+        // 4. Ưu tiên số 4: Bất kỳ giọng vi-VN / vi_VN nào không phải giọng nam
+        const nonMaleVi = viVoices.find(v => !isMaleName(v.name));
+        if (nonMaleVi) {
+            return { voice: nonMaleVi, pitch: 1.0 };
         }
 
-        // Trường hợp thiết bị chỉ cài duy nhất giọng nữ vi-VN -> hạ cao độ về 0.82 để âm sắc trầm trang nghiêm
-        return { voice: viVoices[0], isMale: false, pitch: 0.82 };
+        // 5. Dự phòng cuối cùng nếu thiết bị chỉ có duy nhất 1 giọng tiếng Việt
+        return { voice: viVoices[0], pitch: 1.0 };
     }
 
     /**
-     * Tương thích API lấy đối tượng SpeechSynthesisVoice Tiếng Việt chuẩn nhất
+     * Tương thích API lấy đối tượng SpeechSynthesisVoice Nữ Tiếng Việt chuẩn nhất
      */
     getVietnameseVoice() {
         const profile = this.selectVietnameseVoiceProfile();
-        this.isMaleVoice = profile.isMale;
-        this.pitch = profile.pitch;
+        this.pitch = 1.0;
         return profile.voice;
     }
 
     initVoice() {
         if (!this.synth) return;
         const profile = this.selectVietnameseVoiceProfile();
+        this.pitch = 1.0;
         if (profile.voice) {
             const prevName = this.voice ? this.voice.name : "";
             this.voice = profile.voice;
-            this.isMaleVoice = profile.isMale;
-            this.pitch = profile.pitch;
             if (prevName !== profile.voice.name) {
                 console.log(
-                    "TTS Assistant: Đã chọn giọng đọc gia phả:",
+                    "TTS Assistant: Đã khóa cứng giọng đọc Nữ Tiếng Việt:",
                     profile.voice.name,
-                    `(${profile.voice.lang}) | Nam miền Bắc: ${profile.isMale ? "Có" : "Giả lập trầm ấm"} | Pitch: ${profile.pitch}`
+                    `(${profile.voice.lang})`
                 );
             }
         } else {
             this.voice = null;
-            this.isMaleVoice = false;
-            this.pitch = 0.84;
         }
     }
 
@@ -175,7 +160,7 @@ class TTSAssistant {
      * Thông báo thân thiện khi thiết bị chưa có gói giọng Tiếng Việt
      */
     showDefaultVoiceNotice() {
-        const msg = "Trình duyệt đang dùng giọng mặc định, khuyên dùng Microsoft Edge hoặc Chrome có kết nối mạng để nghe giọng Nam Tiếng Việt chuẩn nhất.";
+        const msg = "Trình duyệt đang dùng giọng mặc định, khuyên dùng Microsoft Edge hoặc Chrome có kết nối mạng để nghe giọng Tiếng Việt Nam chuẩn nhất.";
         if (window.showIndexToast) {
             window.showIndexToast(msg, false);
         } else if (window.showAdminToast) {
@@ -187,12 +172,11 @@ class TTSAssistant {
 
     /**
      * Chia văn bản thành từng câu ngắn theo dấu chấm (.), dấu chấm phẩy (;), dấu hỏi/chấm than và xuống dòng
-     * giúp ngắt nghỉ tự nhiên, trang trọng và không bao giờ bị cắt ngang câu trên Chrome/Edge/iOS
+     * giúp ngắt nghỉ tự nhiên, mượt mà và không bị cắt ngang câu
      */
     splitIntoSentences(text) {
         if (!text) return [];
 
-        // Chuyển các thẻ ngắt dòng HTML thành ký tự xuống dòng trước khi lọc thẻ HTML
         const normalized = String(text)
             .replace(/<\s*br\s*\/?>/gi, "\n")
             .replace(/<\/(p|div|li|h[1-6])>/gi, "\n")
@@ -203,7 +187,7 @@ class TTSAssistant {
         if (!normalized) return [];
 
         // Tách câu theo xuống dòng, dấu chấm phẩy (;), chấm than (!), hỏi chấm (?) và dấu chấm câu (.)
-        // (Bảo vệ các dãy số như 0977.181.611 không bị tách vụn ở dấu chấm giữa hai chữ số)
+        // Bảo vệ các dãy số như 0977.181.611 không bị tách vụn
         const rawParts = normalized
             .split(/(?:\r?\n)+|(?<=[!?;])\s+|(?<!\d)\.(?!\d)\s+/)
             .map(s => s.trim())
@@ -214,7 +198,6 @@ class TTSAssistant {
             if (part.length <= 185) {
                 sentences.push(part);
             } else {
-                // Nếu một câu quá dài (>185 ký tự), tách mềm tại dấu hai chấm hoặc dấu phẩy để tránh lỗi ngắt 15s của trình duyệt
                 const subClauses = part.split(/(?<=[,:])\s+/);
                 let buffer = "";
                 for (const clause of subClauses) {
@@ -237,7 +220,7 @@ class TTSAssistant {
     }
 
     /**
-     * Hủy hàng đợi phát âm cũ một cách an toàn trên mọi trình duyệt (kể cả khi đang pause trên Safari/Chrome)
+     * Hủy hàng đợi phát âm cũ an toàn trên mọi trình duyệt
      */
     safeCancelSynth() {
         if (this._chunkTimer) {
@@ -260,7 +243,7 @@ class TTSAssistant {
      */
     speak(title, fullText) {
         if (!this.synth) {
-            alert("Trình duyệt thiết bị của quý vị chưa tích hợp bộ đọc tiếng Việt Web Speech. Vui lòng thử trên trình duyệt Microsoft Edge, Google Chrome hoặc Safari.");
+            alert("Trình duyệt thiết bị của quý vị chưa tích hợp bộ đọc tiếng Việt Web Speech. Vui lòng thử trên trình duyệt Google Chrome, Edge hoặc Cốc Cốc.");
             return;
         }
 
@@ -270,16 +253,13 @@ class TTSAssistant {
         this.isPlaying = false;
         this.isPaused = false;
 
-        // Cập nhật lại giọng nam Tiếng Việt tốt nhất ngay trước khi phát
+        // Cập nhật lại giọng Nữ Tiếng Việt tốt nhất ngay trước khi phát
         const profile = this.selectVietnameseVoiceProfile();
+        this.pitch = 1.0;
         if (profile.voice) {
             this.voice = profile.voice;
-            this.isMaleVoice = profile.isMale;
-            this.pitch = profile.pitch;
         } else {
             this.voice = null;
-            this.isMaleVoice = false;
-            this.pitch = 0.84;
             this.showDefaultVoiceNotice();
         }
 
@@ -298,7 +278,6 @@ class TTSAssistant {
         this.updateBarUI();
 
         const currentSession = this.playSessionId;
-        // Khoảng trễ nhỏ 40ms sau cancel() giúp Edge/Chrome không nuốt âm đầu của câu thứ nhất
         this._chunkTimer = setTimeout(() => {
             if (currentSession === this.playSessionId && this.isPlaying) {
                 this.speakNextChunk(currentSession);
@@ -321,19 +300,16 @@ class TTSAssistant {
         const sentence = this.currentChunks[this.chunkIndex];
         const utter = new SpeechSynthesisUtterance(sentence);
 
-        // Khóa ngôn ngữ Tiếng Việt và nhịp đọc trầm ấm
-        const profile = this.selectVietnameseVoiceProfile();
-        const selectedVoice = profile.voice || this.voice;
-
-        utter.lang = (selectedVoice && selectedVoice.lang) ? selectedVoice.lang : "vi-VN";
+        // Khóa cứng ngôn ngữ vi-VN và cao độ chuẩn tự nhiên cho giọng Nữ
+        utter.lang = "vi-VN";
         utter.rate = this.rate;
-        utter.pitch = selectedVoice ? profile.pitch : this.pitch;
+        utter.pitch = 1.0;
         utter.volume = 1.0;
 
+        const profile = this.selectVietnameseVoiceProfile();
+        const selectedVoice = profile.voice || this.voice;
         if (selectedVoice) {
             this.voice = selectedVoice;
-            this.isMaleVoice = profile.isMale;
-            this.pitch = profile.pitch;
             utter.voice = selectedVoice;
         }
 
@@ -348,12 +324,11 @@ class TTSAssistant {
                     this.updateBarUI();
                     this.hideFloatingBar();
                 } else {
-                    // Nghỉ nhịp ngắn 130ms giữa các câu tạo phong thái đọc gia phả khoan thai, truyền cảm
                     this._chunkTimer = setTimeout(() => {
                         if (sessionId === this.playSessionId && this.isPlaying && !this.isPaused) {
                             this.speakNextChunk(sessionId);
                         }
-                    }, 130);
+                    }, 90);
                 }
             }
         };
@@ -361,7 +336,6 @@ class TTSAssistant {
         utter.onerror = (e) => {
             if (sessionId !== this.playSessionId) return;
             const errType = e && e.error ? String(e.error).toLowerCase() : "";
-            // Bỏ qua sự kiện hủy chủ động khi người dùng bấm Dừng / chuyển bài / đổi tốc độ
             if (errType === "canceled" || errType === "interrupted") {
                 return;
             }
@@ -372,7 +346,7 @@ class TTSAssistant {
                     if (sessionId === this.playSessionId && this.isPlaying && !this.isPaused) {
                         this.speakNextChunk(sessionId);
                     }
-                }, 80);
+                }, 60);
             }
         };
 
@@ -411,7 +385,6 @@ class TTSAssistant {
         }
         this.updateBarUI();
 
-        // Phòng lỗi trình duyệt đóng băng sau khi tạm dừng lâu: nếu chưa phát lại thì đọc tiếp câu hiện tại
         setTimeout(() => {
             if (sessionId === this.playSessionId && this.isPlaying && !this.isPaused && !this.synth.speaking) {
                 this.speakNextChunk(sessionId);
@@ -420,7 +393,7 @@ class TTSAssistant {
     }
 
     /**
-     * Đảo trạng thái Tạm dừng <-> Tiếp tục mượt mà, không bao giờ kẹt nút
+     * Đảo trạng thái Tạm dừng <-> Tiếp tục mượt mà
      */
     togglePause() {
         if (!this.synth || !this.isPlaying) return;
@@ -451,7 +424,6 @@ class TTSAssistant {
             this.rate = parsed;
         }
         if (this.isPlaying) {
-            // Hủy câu hiện tại với session mới và phát lại ngay từ đầu câu đó ở tốc độ mới
             this.playSessionId++;
             this.isPaused = false;
             this.safeCancelSynth();
@@ -468,11 +440,11 @@ class TTSAssistant {
     }
 
     /**
-     * Kiểm tra mức tốc độ đang chọn ('slow' | 'normal' | 'fast')
+     * Kiểm tra mức tốc độ đang chọn: Chậm (0.85) | Vừa (1.0) | Nhanh (1.2)
      */
     getRateMode() {
-        if (this.rate <= 0.84) return "slow";
-        if (this.rate >= 1.02) return "fast";
+        if (this.rate <= 0.92) return "slow";
+        if (this.rate >= 1.1) return "fast";
         return "normal";
     }
 
@@ -510,9 +482,9 @@ class TTSAssistant {
                     </button>
                     <div class="tts-rate-selector">
                         <span class="tts-rate-label">Tốc độ:</span>
-                        <button type="button" class="tts-btn-rate ${mode === "slow" ? "active" : ""}" data-rate="0.78" title="Đọc chậm trang nghiêm cho người cao tuổi (0.78x)">Chậm</button>
-                        <button type="button" class="tts-btn-rate ${mode === "normal" ? "active" : ""}" data-rate="0.92" title="Đọc vừa chuẩn truyền cảm (0.92x)">Vừa</button>
-                        <button type="button" class="tts-btn-rate ${mode === "fast" ? "active" : ""}" data-rate="1.08" title="Đọc nhanh rõ chữ (1.08x)">Nhanh</button>
+                        <button type="button" class="tts-btn-rate ${mode === "slow" ? "active" : ""}" data-rate="0.85" title="Đọc chậm cho người cao tuổi (0.85x)">Chậm</button>
+                        <button type="button" class="tts-btn-rate ${mode === "normal" ? "active" : ""}" data-rate="1.0" title="Đọc vừa chuẩn tự nhiên (1.0x)">Vừa</button>
+                        <button type="button" class="tts-btn-rate ${mode === "fast" ? "active" : ""}" data-rate="1.2" title="Đọc nhanh (1.2x)">Nhanh</button>
                     </div>
                     <button type="button" class="tts-btn-close" id="tts-btn-close" title="Đóng thanh giọng đọc">✕</button>
                 </div>
@@ -552,7 +524,6 @@ class TTSAssistant {
     updateBarUI() {
         const mode = this.getRateMode();
 
-        // 1. Cập nhật trên thanh nổi Floating Bar
         const bar = document.getElementById("tts-floating-bar");
         if (bar) {
             const btnToggle = bar.querySelector("#tts-btn-toggle");
@@ -565,12 +536,11 @@ class TTSAssistant {
             }
             bar.querySelectorAll(".tts-btn-rate").forEach(b => {
                 const r = parseFloat(b.dataset.rate);
-                const bMode = r <= 0.84 ? "slow" : (r >= 1.02 ? "fast" : "normal");
+                const bMode = r <= 0.92 ? "slow" : (r >= 1.1 ? "fast" : "normal");
                 b.classList.toggle("active", bMode === mode);
             });
         }
 
-        // 2. Đồng bộ toàn bộ cụm nút trên thẻ Tiểu sử / Bia ký / Sách gia phả
         document.querySelectorAll(".btn-tts-pause").forEach(btn => {
             if (this.isPlaying && this.isPaused) {
                 btn.innerHTML = "▶️ Tiếp Tục";
@@ -583,9 +553,9 @@ class TTSAssistant {
 
         document.querySelectorAll(".member-tts-speed .btn-tts-speed").forEach(btn => {
             const onclickAttr = btn.getAttribute("onclick") || "";
-            if (onclickAttr.includes("0.78") || onclickAttr.includes("0.75")) {
+            if (onclickAttr.includes("0.85") || onclickAttr.includes("0.75") || onclickAttr.includes("0.78")) {
                 btn.classList.toggle("active", mode === "slow");
-            } else if (onclickAttr.includes("1.08") || onclickAttr.includes("1.2")) {
+            } else if (onclickAttr.includes("1.2") || onclickAttr.includes("1.08")) {
                 btn.classList.toggle("active", mode === "fast");
             } else {
                 btn.classList.toggle("active", mode === "normal");
@@ -687,7 +657,6 @@ window.ttsSpeakMember = function(memberId) {
 
 /**
  * Các hàm điều khiển nhanh giọng đọc cho giao diện bảng tiểu sử
- * Nút Tạm dừng tự động đảo Tạm dừng <-> Tiếp tục để không bao giờ bị kẹt nút
  */
 window.ttsPause = function() {
     if (window.ttsAssistant) window.ttsAssistant.togglePause();

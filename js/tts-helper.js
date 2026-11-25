@@ -1,7 +1,7 @@
 /**
  * GIA PHẢ HỌ TRẦN - TTS HELPER
- * Trợ lý điều khiển giọng đọc Nam Tiếng Việt miền Bắc trầm ấm (vi-VN)
- * Ưu tiên: Microsoft NamMinh Online -> NamMinh / An / Male / Nam -> Google Tiếng Việt / vi-VN (hạ pitch 0.82-0.84).
+ * Trợ lý điều khiển giọng đọc Nữ Tiếng Việt Nam chuẩn tự nhiên (vi-VN)
+ * Ưu tiên: Microsoft HoaiMy Online / HoaiMy -> Linh -> Google Tiếng Việt -> vi-VN (loại trừ ưu tiên giọng Nam).
  */
 
 window.ttsHelper = {
@@ -14,20 +14,21 @@ window.ttsHelper = {
         const viVoices = voices.filter(v => {
             const lang = (v.lang || "").toLowerCase();
             const name = (v.name || "").toLowerCase();
-            return lang.startsWith("vi") || lang.includes("vi") || name.includes("vietnam") || name.includes("tiếng việt") || name.includes("namminh");
+            return lang.startsWith("vi") || lang.includes("vi-") || name.includes("vietnam") || name.includes("tiếng việt") || name.includes("hoaimy");
         });
         if (!viVoices.length) return null;
 
-        const isFemale = (n) => /hoaimy|hoài\s*my|\blinh\b|female|\bnữ\b|\bnu\b/i.test(n || "");
         const isMale = (n) => {
             const stripped = (n || "").replace(/việt\s*nam|viet\s*nam|vietnamese/gi, " ");
-            return /namminh|nam\s*minh|\ban\b|\bmale\b|\bnam\b/i.test(stripped);
+            return /namminh|nam\s*minh|\bmale\b|giọng\s*nam|\ban\b|\bnam\b/i.test(stripped);
         };
+        const isFemale = (n) => /hoaimy|hoài\s*my|\blinh\b|female|\bnữ\b|\bnu\b|giọng\s*nữ/i.test(n || "");
 
         return (
-            viVoices.find(v => /microsoft/i.test(v.name) && /nam\s*minh/i.test(v.name) && /online/i.test(v.name)) ||
-            viVoices.find(v => isMale(v.name) && !isFemale(v.name)) ||
-            viVoices.find(v => !isFemale(v.name)) ||
+            viVoices.find(v => /hoai\s*my|hoài\s*my/i.test(v.name) && /online/i.test(v.name)) ||
+            viVoices.find(v => isFemale(v.name) && !isMale(v.name)) ||
+            viVoices.find(v => /google/i.test(v.name) && !isMale(v.name)) ||
+            viVoices.find(v => !isMale(v.name)) ||
             viVoices[0]
         );
     },

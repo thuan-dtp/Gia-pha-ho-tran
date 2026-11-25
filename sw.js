@@ -3,7 +3,7 @@
  * Lưu trữ và phục vụ toàn bộ ứng dụng khi thiết bị không có mạng Internet.
  */
 
-const CACHE_NAME = "giapha-hotran-v6.2.0-male-voice-northern-vn";
+const CACHE_NAME = "giapha-hotran-v6.2.1-female-voice-vn";
 
 const ASSETS_TO_CACHE = [
     "./",
